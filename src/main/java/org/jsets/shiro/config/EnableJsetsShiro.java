@@ -11,6 +11,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(JsetsShiroAutoConfiguration.class)
-public @interface EnabledJsetsShiro {
+public @interface EnableJsetsShiro {
 
 }
