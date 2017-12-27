@@ -1,3 +1,20 @@
+/*
+ * Copyright 2017-2018 the original author(https://github.com/wj596)
+ * 
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * </p>
+ */
 package org.jsets.shiro.service;
 
 import java.util.List;
@@ -7,6 +24,12 @@ import org.jsets.shiro.model.JwtRule;
 import org.jsets.shiro.model.PermRule;
 import org.jsets.shiro.model.RoleRule;
 
+/**
+ * 过滤规则提供者
+ * 
+ * @author wangjie (https://github.com/wj596)
+ * @date 2016年6月31日
+ */
 public interface ShiroFilteRulesProvider  {
 	/**
 	 * 加载基于角色的过滤规则
@@ -17,6 +40,9 @@ public interface ShiroFilteRulesProvider  {
 	 * <br>当用户持有[角色1、角色2、角色n]中的任何一个角色，则给予访问，否则不予访问
 	 * @return  @see org.jsets.shiro.model.RoleRule
 	 *
+	 */
+	/**
+	 * @return
 	 */
 	public List<RoleRule> loadRoleRules();
 	/**

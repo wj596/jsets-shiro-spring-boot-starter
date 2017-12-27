@@ -7,8 +7,8 @@ import org.apache.shiro.subject.Subject;
 /**
  * 重写PermissionsAuthorizationFilter，使其继承自JsetsAuthorizationFilter
  * 
- * @author wangjie (http://www.jianshu.com/u/ffa3cba4c604) 
- * @date 2016年6月24日 下午2:55:15
+ * author wangjie (https://github.com/wj596)
+ * @date 2016年6月31日
  */
 public class JsetsPermissionsAuthorizationFilter extends JsetsAuthorizationFilter{
 	
