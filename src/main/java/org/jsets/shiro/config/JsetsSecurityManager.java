@@ -35,7 +35,8 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.AbstractShiroFilter;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
-import org.jsets.shiro.authc.JsetsBooleanMatcher;
+import org.jsets.shiro.authc.JsetsHmacMatcher;
+import org.jsets.shiro.authc.JsetsJwtMatcher;
 import org.jsets.shiro.authc.JsetsPasswdMatcher;
 import org.jsets.shiro.cache.CacheDelegator;
 import org.jsets.shiro.cache.MapCacheManager;
@@ -49,23 +50,24 @@ import org.jsets.shiro.filter.JsetsUserFilter;
 import org.jsets.shiro.filter.KeepOneUserFilter;
 import org.jsets.shiro.filter.stateless.HmacAuthcFilter;
 import org.jsets.shiro.filter.stateless.HmacRolesFilter;
-import org.jsets.shiro.filter.stateless.JwtFilter;
+import org.jsets.shiro.filter.stateless.JwtAuthcFilter;
 import org.jsets.shiro.handler.DefaultSessionListener;
 import org.jsets.shiro.model.CustomRule;
 import org.jsets.shiro.model.HmacRule;
 import org.jsets.shiro.model.JwtRule;
-import org.jsets.shiro.model.PermRule;
-import org.jsets.shiro.model.RoleRule;
+import org.jsets.shiro.model.RolePermRule;
 import org.jsets.shiro.realm.HmacRealm;
 import org.jsets.shiro.realm.JwtRealm;
-import org.jsets.shiro.realm.PasswdRealm;
+import org.jsets.shiro.realm.AccountPasswdRealm;
 import org.jsets.shiro.service.DefaultShiroStatelessAccountProviderImpl;
 import org.jsets.shiro.service.ShiroCryptoService;
 import org.jsets.shiro.service.ShiroFilteRulesProvider;
 import org.jsets.shiro.service.ShiroStatelessAccountProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -146,7 +148,7 @@ public class JsetsSecurityManager {
 	}
 	
 	
-	protected CacheManager decideCacheManager(final ShiroProperties properties,final RedisTemplate redisTemplate) {
+	protected CacheManager decideCacheManager(final ShiroProperties properties,final RedisConnectionFactory redisConnectionFactory) {
 		if (null != this.getSecurityConfig().getCacheManager()) {
 			return this.getSecurityConfig().getCacheManager();
 		} else {
@@ -159,8 +161,16 @@ public class JsetsSecurityManager {
 				EhCacheManager ehCacheManager = new EhCacheManager();
 				ehCacheManager.setCacheManagerConfigFile(properties.getEhcacheConfigFile());
 				return ehCacheManager;
-			} else if (enabledRedis && null != redisTemplate) {
+			} else if (enabledRedis && null != redisConnectionFactory) {
 				RedisCacheManager redisCacheManager = new RedisCacheManager();
+
+				GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();  
+				RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<Object, Object>();
+				redisTemplate.setConnectionFactory(redisConnectionFactory);
+				redisTemplate.setKeySerializer(jsonSerializer);
+				redisTemplate.setHashKeySerializer(jsonSerializer);
+				redisTemplate.setBeanClassLoader(this.getClass().getClassLoader());
+				redisTemplate.afterPropertiesSet();
 				redisCacheManager.setRedisTemplate(redisTemplate);
 				return redisCacheManager;
 			} else {
@@ -174,22 +184,22 @@ public class JsetsSecurityManager {
 										final ShiroCryptoService cryptoService, final CacheDelegator cacheDelegator) {
 
 		List<Realm> useRealms = Lists.newLinkedList();
-		JsetsPasswdMatcher passwdMatcher = new JsetsPasswdMatcher(
-					properties,cacheDelegator,cryptoService,this.getSecurityConfig().getPasswdRetryLimitHandler());
-		JsetsBooleanMatcher booleanMatcher = new JsetsBooleanMatcher();
-		PasswdRealm passwdRealm = new PasswdRealm(this.getSecurityConfig().getAccountProvider());
-		passwdRealm.setCredentialsMatcher(passwdMatcher);
+		JsetsPasswdMatcher passwdMatcher = new JsetsPasswdMatcher(properties,cacheDelegator,cryptoService
+															  ,this.getSecurityConfig().getPasswdRetryLimitHandler());
+		
+		AccountPasswdRealm accountPasswdRealm = new AccountPasswdRealm(this.getSecurityConfig().getAccountProvider());
+		accountPasswdRealm.setCredentialsMatcher(passwdMatcher);
 		if (properties.isAuthCacheEnabled()) {
-			passwdRealm.setAuthorizationCacheName(ShiroProperties.CACHE_NAME_AUTHORIZATION);
-			passwdRealm.setAuthenticationCacheName(ShiroProperties.CACHE_NAME_AUTHENTICATION);
-			passwdRealm.setAuthenticationCachingEnabled(Boolean.TRUE);
-			passwdRealm.setAuthorizationCachingEnabled(Boolean.TRUE);
-			passwdRealm.setCachingEnabled(Boolean.TRUE);
-			this.cachedRealms.add(passwdRealm);
+			accountPasswdRealm.setAuthorizationCacheName(ShiroProperties.CACHE_NAME_AUTHORIZATION);
+			accountPasswdRealm.setAuthenticationCacheName(ShiroProperties.CACHE_NAME_AUTHENTICATION);
+			accountPasswdRealm.setAuthenticationCachingEnabled(Boolean.TRUE);
+			accountPasswdRealm.setAuthorizationCachingEnabled(Boolean.TRUE);
+			accountPasswdRealm.setCachingEnabled(Boolean.TRUE);
+			this.cachedRealms.add(accountPasswdRealm);
 		} else {
-			passwdRealm.setCachingEnabled(Boolean.FALSE);
+			accountPasswdRealm.setCachingEnabled(Boolean.FALSE);
 		}
-		useRealms.add(passwdRealm);
+		useRealms.add(accountPasswdRealm);
 
 		if (properties.isHmacEnabled()) {
 			ShiroStatelessAccountProvider accountProvider = null;
@@ -197,14 +207,16 @@ public class JsetsSecurityManager {
 				accountProvider = 
 					new DefaultShiroStatelessAccountProviderImpl(this.getSecurityConfig().getAccountProvider());
 			}
-			HmacRealm hmacRealm = new HmacRealm(cryptoService, accountProvider);
-			hmacRealm.setCredentialsMatcher(booleanMatcher);
+			JsetsHmacMatcher hmacMatcher = new JsetsHmacMatcher(properties,cryptoService,accountProvider);
+			HmacRealm hmacRealm = new HmacRealm(accountProvider);
+			hmacRealm.setCredentialsMatcher(hmacMatcher);
 			hmacRealm.setCachingEnabled(Boolean.FALSE);
 			useRealms.add(hmacRealm);
 		}
 		if (properties.isJwtEnabled()) {
-			JwtRealm jwtRealm = new JwtRealm(cryptoService);
-			jwtRealm.setCredentialsMatcher(booleanMatcher);
+			JsetsJwtMatcher jwtMatcher = new JsetsJwtMatcher(cryptoService);
+			JwtRealm jwtRealm = new JwtRealm();
+			jwtRealm.setCredentialsMatcher(jwtMatcher);
 			jwtRealm.setCachingEnabled(Boolean.FALSE);
 			useRealms.add(jwtRealm);
 		}
@@ -216,7 +228,7 @@ public class JsetsSecurityManager {
 				authorizingRealm.setAuthenticationCachingEnabled(Boolean.TRUE);
 				authorizingRealm.setAuthorizationCachingEnabled(Boolean.TRUE);
 				authorizingRealm.setCachingEnabled(Boolean.TRUE);
-				this.cachedRealms.add(passwdRealm);
+				this.cachedRealms.add(accountPasswdRealm);
 				useRealms.add(authorizingRealm);
 			} else {
 				useRealms.add(realm);
@@ -265,7 +277,7 @@ public class JsetsSecurityManager {
 			filters.putIfAbsent(FILTER_HMAC_ROLES, hmacRolesFilter);
 		}
 		if (properties.isHmacEnabled()) {
-			JwtFilter jwtFilter = new JwtFilter();
+			JwtAuthcFilter jwtFilter = new JwtAuthcFilter();
 			filters.putIfAbsent(FILTER_JWT, jwtFilter);
 		}
 		this.getShiroFilterFactoryBean().setFilters(filters);
@@ -307,7 +319,6 @@ public class JsetsSecurityManager {
 		if (properties.isJcaptchaEnable())
 			filterChainDefinitionMap.put(ShiroProperties.DEFAULT_JCAPTCHA_URL, FILTER_JCAPTCHA);
 		filterChainDefinitionMap.putAll(this.getStaticRules());
-		System.out.println(filterChainDefinitionMap);
 		this.getShiroFilterFactoryBean().setFilterChainDefinitionMap(filterChainDefinitionMap);
 	}
 
@@ -343,54 +354,66 @@ public class JsetsSecurityManager {
 		ShiroFilteRulesProvider filteRulesProvider = this.filterChainConfig.getShiroFilteRulesProvider();
 		Map<String, String> dynamicRules = Maps.newLinkedHashMap();
 		if(null == filteRulesProvider) return dynamicRules;
-		List<RoleRule> roleRules = filteRulesProvider.loadRoleRules();
-		List<PermRule> permRules = filteRulesProvider.loadPermRules();
+		List<RolePermRule> rolePermRules = filteRulesProvider.loadRolePermRules();
 		List<HmacRule> hmacRules = filteRulesProvider.loadHmacRules();
 		List<JwtRule> jwtRules = filteRulesProvider.loadJwtRules();
 		List<CustomRule> customRules = filteRulesProvider.loadCustomRules();
-		if(null!=roleRules&&!roleRules.isEmpty()){
-            for(RoleRule roleRule : roleRules){
-            	if(Strings.isNullOrEmpty(roleRule.getUrl())) continue;
-            	if(Strings.isNullOrEmpty(roleRule.getNeedRoles())) continue;
-            	dynamicRules.putIfAbsent(roleRule.getUrl(), FILTER_ROLES+"["+roleRule.getNeedRoles()+"]"+this.getAdditionFilters());
+		if(null!=rolePermRules&&!rolePermRules.isEmpty()){
+            for(RolePermRule rolePermRule : rolePermRules){
+            	if(Strings.isNullOrEmpty(rolePermRule.getUrl())) continue;
+            	StringBuilder sb = new StringBuilder();
+            	if(!Strings.isNullOrEmpty(rolePermRule.getNeedRoles())){
+            		sb.append(FILTER_ROLES+"["+rolePermRule.getNeedRoles()+"]");
+            	}
+            	if(!Strings.isNullOrEmpty(rolePermRule.getNeedPerms())){
+            		if(sb.length()>0) sb.append(",");
+            		sb.append(FILTER_PERMS+"["+rolePermRule.getNeedRoles()+"]");
+            	}
+            	if(sb.length()==0) continue;
+            	sb.append(this.getAdditionFilters());
+            	dynamicRules.putIfAbsent(rolePermRule.getUrl(), sb.toString());
     		}
 		}
-		if(null!=permRules&&!permRules.isEmpty()){
-            for(PermRule permRule : permRules){
-            	if(Strings.isNullOrEmpty(permRule.getUrl())) continue;
-            	if(Strings.isNullOrEmpty(permRule.getNeedPerms())) continue;
-            	dynamicRules.putIfAbsent(permRule.getUrl(), FILTER_PERMS+"["+permRule.getNeedPerms()+"]"+this.getAdditionFilters());
-    		}
-		}
+
 		if(null!=hmacRules&&!hmacRules.isEmpty()){
             for(HmacRule hmacRule : hmacRules){
             	if(Strings.isNullOrEmpty(hmacRule.getUrl())) continue;
-            	if(Strings.isNullOrEmpty(hmacRule.getNeedRoles())){
-            		dynamicRules.putIfAbsent(hmacRule.getUrl(), FILTER_HMAC_ROLES+"["+hmacRule.getNeedRoles()+"]");
-            	} else if(Strings.isNullOrEmpty(hmacRule.getNeedPerms())){
-            		dynamicRules.putIfAbsent(hmacRule.getUrl(), FILTER_HMAC_PERMS+"["+hmacRule.getNeedPerms()+"]");
-            	} else {
-            		dynamicRules.putIfAbsent(hmacRule.getUrl(), FILTER_HMAC);
+            	StringBuilder sb = new StringBuilder();
+            	if(!Strings.isNullOrEmpty(hmacRule.getNeedRoles())){
+            		sb.append(FILTER_HMAC_ROLES+"["+hmacRule.getNeedRoles()+"]");
             	}
+            	if(!Strings.isNullOrEmpty(hmacRule.getNeedPerms())){
+            		if(sb.length()>0) sb.append(",");
+            		sb.append(FILTER_HMAC_PERMS+"["+hmacRule.getNeedRoles()+"]");
+            	}
+            	if(sb.length()==0) {
+            		sb.append(FILTER_HMAC);
+            	}
+            	dynamicRules.putIfAbsent(hmacRule.getUrl(), sb.toString());
     		}
 		}
 		if(null!=jwtRules&&!jwtRules.isEmpty()){
-            for(JwtRule jwtRule : jwtRules){
+			for(JwtRule jwtRule : jwtRules){
             	if(Strings.isNullOrEmpty(jwtRule.getUrl())) continue;
-            	if(Strings.isNullOrEmpty(jwtRule.getNeedRoles())){
-            		dynamicRules.putIfAbsent(jwtRule.getUrl(), FILTER_JWT_ROLES+"["+jwtRule.getNeedRoles()+"]");
-            	} else if(Strings.isNullOrEmpty(jwtRule.getNeedPerms())){
-            		dynamicRules.putIfAbsent(jwtRule.getUrl(), FILTER_JWT_PERMS+"["+jwtRule.getNeedPerms()+"]");
-            	} else {
-            		dynamicRules.putIfAbsent(jwtRule.getUrl(), FILTER_JWT);
+            	StringBuilder sb = new StringBuilder();
+            	if(!Strings.isNullOrEmpty(jwtRule.getNeedRoles())){
+            		sb.append(FILTER_JWT_ROLES+"["+jwtRule.getNeedRoles()+"]");
             	}
-    		}
+            	if(!Strings.isNullOrEmpty(jwtRule.getNeedPerms())){
+            		if(sb.length()>0) sb.append(",");
+            		sb.append(FILTER_JWT_PERMS+"["+jwtRule.getNeedRoles()+"]");
+            	}
+            	if(sb.length()==0) {
+            		sb.append(FILTER_JWT);
+            	}
+            	dynamicRules.putIfAbsent(jwtRule.getUrl(), sb.toString());
+    		} 
 		}
 		if(null!=customRules&&!customRules.isEmpty()){
             for(CustomRule customRule : customRules){
             	if(Strings.isNullOrEmpty(customRule.getUrl())) continue;
             	if(Strings.isNullOrEmpty(customRule.getRule())) continue;
-            	dynamicRules.putIfAbsent(customRule.getUrl(), customRule.getRule());
+            	dynamicRules.putIfAbsent(customRule.getUrl(),customRule.getRule()+this.getAdditionFilters());
     		}
 		}
 		return dynamicRules;

@@ -20,18 +20,29 @@ package org.jsets.shiro.model;
 import java.io.Serializable;
 
 /**
- * 基于角色的过滤规则
+ * 基于角色/权限的过滤规则
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  *
  */
-public class RoleRule implements Serializable{
+public class RolePermRule implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	
 	private String url;// 资源URL
 	private String needRoles;// 访问需要的角色列表(多个角色用逗号分开)
+	private String needPerms;// 访问需要的权限列表(多个权限用逗号分开)
+
+	
+	/**
+	 * @param url 访问地址
+	 * @param needRoles 访问需要的角色列表
+	 */
+	public RolePermRule(String url,String needRoles){
+		this.url = url;
+		this.needRoles = needRoles;
+	}
 	
 	public String getUrl() {
 		return url;
@@ -44,5 +55,11 @@ public class RoleRule implements Serializable{
 	}
 	public void setNeedRoles(String needRoles) {
 		this.needRoles = needRoles;
+	}
+	public String getNeedPerms() {
+		return needPerms;
+	}
+	public void setNeedPerms(String needPerms) {
+		this.needPerms = needPerms;
 	}
 }

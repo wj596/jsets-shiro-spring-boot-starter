@@ -33,6 +33,11 @@ public class CustomRule implements Serializable{
 	private String url;// 资源URL
 	private String rule;// 过滤规则
 	
+	public CustomRule(String url,String rule){
+		this.url = url;
+		this.rule = rule;
+	}
+	
 	public String getUrl() {
 		return url;
 	}

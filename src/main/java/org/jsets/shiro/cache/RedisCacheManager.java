@@ -23,13 +23,6 @@ import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 基于REDIS的缓存管理器
@@ -37,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-@SuppressWarnings("all")
+@SuppressWarnings("unchecked")
 public class RedisCacheManager implements CacheManager{
 
 	private RedisTemplate redisTemplate;
@@ -53,13 +46,7 @@ public class RedisCacheManager implements CacheManager{
         return cache;  
 	}
 
-	public void setRedisTemplate(RedisTemplate redisTemplate) {
-		//ConnectionFactory ConnectionFactoryredisTemplate.getConnectionFactory()
-	    GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();  
-	    //redisTemplate.setKeySerializer(jsonSerializer);
-	    //redisTemplate.setHashKeySerializer(jsonSerializer);
-	    //redisTemplate.setValueSerializer(jsonSerializer);
-	   // redisTemplate.setHashValueSerializer(jsonSerializer);
+	public void setRedisTemplate(RedisTemplate<Object, Object> redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}
 }

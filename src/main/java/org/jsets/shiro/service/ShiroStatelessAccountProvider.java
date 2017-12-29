@@ -27,13 +27,17 @@ import org.apache.shiro.authc.AuthenticationException;
  */ 
 public interface ShiroStatelessAccountProvider {
 	/**
-	 * 根据客户标识检查账号
-	 * <br>如果账号有异常或者不允许方法可抛出AuthenticationException或返回false
+	 * 检查账号是否正常
+	 * <br>如果返回false或抛出AuthenticationException则不予通过认证
 	 * @param appId 客户标识
-	 * @return 账号信息
-	 * @see org.jsets.weblite.core.security.Account
 	 */
-	public String loadAppKey(String appId) throws AuthenticationException;
+	public boolean checkAccount(String appId) throws AuthenticationException;
+	/**
+	 * 获取客户端的签名私钥
+	 * <br>如果客户端没有私钥返回空，则使用全局秘钥
+	 * @param appId 客户标识
+	 */
+	public String loadAppKey(String appId);
 	/**
 	 * 根据客户标识加载持有角色
 	 * @param appId 客户标识

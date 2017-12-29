@@ -36,6 +36,16 @@ public class DefaultShiroStatelessAccountProviderImpl implements ShiroStatelessA
 	}
 	
 	@Override
+	public boolean checkAccount(String appId) throws AuthenticationException {
+		return true;
+	}
+	
+	@Override
+	public String loadAppKey(String appId) throws AuthenticationException {
+		return null;
+	}
+
+	@Override
 	public Set<String> loadRoles(String appId) {
 		return this.shiroSecurityService.loadRoles(appId);
 	}
@@ -44,10 +54,4 @@ public class DefaultShiroStatelessAccountProviderImpl implements ShiroStatelessA
 	public Set<String> loadPermissions(String appId) {
 		return this.shiroSecurityService.loadPermissions(appId);
 	}
-	@Override
-	public String loadAppKey(String appId) throws AuthenticationException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 }

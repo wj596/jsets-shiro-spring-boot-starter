@@ -38,7 +38,6 @@ public class DefaultSessionListener implements SessionListener {
      */
     @Override
     public void onStart(Session session) {
-    	System.out.println("创建session:("+session.getId()+","+session.getHost()+")");
     	LOGGER.info("创建session:("+session.getId()+","+session.getHost()+")");
     }
     /**
@@ -46,7 +45,6 @@ public class DefaultSessionListener implements SessionListener {
      */
     @Override
     public void onStop(Session session) {
-    	System.out.println("结束session:("+session.getId()+","+session.getHost()+")");
     	LOGGER.info("结束session:("+session.getId()+","+session.getHost()+")");
     }
     /**
@@ -54,7 +52,6 @@ public class DefaultSessionListener implements SessionListener {
      */
     @Override
     public void onExpiration(Session session) {
-    	System.out.println("过期session:("+session.getId()+","+session.getHost()+")");
     	LOGGER.info("过期session:("+session.getId()+","+session.getHost()+")");
     }
 

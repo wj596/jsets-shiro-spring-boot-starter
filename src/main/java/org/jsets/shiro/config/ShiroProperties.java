@@ -48,6 +48,7 @@ public class ShiroProperties {
 	protected static final Integer DEFAULT_REMEMBERME_MAX_AGE = 86400000 * 7;//// 1天=86400000毫秒(ms);
 	protected static final String DEFAULT_JWT_SECRETKEY = "123456789987654321.";
 	protected static final Integer DEFAULT_SESSION_TIMEOUT = 3600000;// 1小时=3600000毫秒(ms)
+	protected static final Integer DEFAULT_HMAC_DIGEST_TIMEOUT = 3600000;// 10分钟=600000毫秒(ms)
 	public static final String DEFAULT_JCAPTCHA_URL = "/jcaptcha.jpg";
 	
 	public static final String CACHE_NAME_PASSWORD_RETRY = "shiro-passwordRetryCache";
@@ -61,10 +62,23 @@ public class ShiroProperties {
 	public static final String ATTRIBUTE_SESSION_FORCE_LOGOUT = "shiro_force_logout_attribute";
 	public static final String ATTRIBUTE_REQUEST_AUTH_MESSAGE = "shiro_auth_message";
 	
-	public static final String MSG_AUTHC_ERROR = "用户名或密码错误";
-	public static final String MSG_ACCOUNT_ERROR = "账号出现异常";
-	public static final String MSG_JWT_AUTHC_ERROR = "JSON WEB TOKEN无效";
-	public static final String MSG_HMAC_AUTHC_ERROR = "数字摘要无效";
+	public static final String MSG_ACCOUNT_EXCEPTION = "账号异常";
+	public static final String MSG_ACCOUNT_NOTFOUND = "账号或密码错误";
+	public static final String MSG_ACCOUNT_PASSWD_NULL = "账号或密码为空";
+	public static final String MSG_ACCOUNT_AUTHC_ERROR = "账号或密码错误";
+	//最大次数{total},剩余次数：{remain}
+	public static final String MSG_ACCOUNT_AUTHC_RETRY_ERROR = "密码错误,您还可以重试：{remain}次";
+	public static final String MSG_HMAC_AUTHC_ERROR = "数字签名无效";
+	public static final String MSG_HMAC_DIGEST_TIMEOUT = "数字签名过期";
+	public static final String MSG_JWT_TIMEOUT = "令牌过期";
+	public static final String MSG_JWT_MALFORMED = "令牌格式错误";
+	public static final String MSG_JWT_SIGNATURE = "令牌数字签名错误";
+	public static final String MSG_JWT_AUTHC_ERROR = "令牌无效";
+	
+	
+
+	
+	
 	
 	public static final String PARAM_HMAC_APP_ID = "hmac_app_id";
 	public static final String PARAM_HMAC_TIMESTAMP = "hmac_timestamp";
@@ -120,6 +134,7 @@ public class ShiroProperties {
 	private Integer passwdIterations = DEFAULT_HASH_ITERATIONS;// 密码HASH次数
 	private String hmacAlg = DEFAULT_HMAC_ALGORITHM_NAME;// HMAC算法
 	private String hmacSecretKey;// HMAC秘钥
+	private Integer hmacDigestTimeout = DEFAULT_HMAC_DIGEST_TIMEOUT;// HMAC签名有效时间
 	private String jwtSecretKey;// JWT秘钥
 
 	private boolean ehcacheEnabled = Boolean.FALSE;// 启用ehcache缓存
@@ -335,5 +350,12 @@ public class ShiroProperties {
 
 	public void setJwtEnabled(boolean jwtEnabled) {
 		this.jwtEnabled = jwtEnabled;
+	}
+
+	public Integer getHmacDigestTimeout() {
+		return hmacDigestTimeout;
+	}
+	public void setHmacDigestTimeout(Integer hmacDigestTimeout) {
+		this.hmacDigestTimeout = hmacDigestTimeout;
 	}
 }

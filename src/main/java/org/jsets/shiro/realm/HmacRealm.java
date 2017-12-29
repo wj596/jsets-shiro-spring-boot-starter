@@ -41,11 +41,9 @@ import org.jsets.shiro.token.HmacToken;
  */
 public class HmacRealm extends AuthorizingRealm{
 	
-	private final ShiroCryptoService cryptoService;
 	private final ShiroStatelessAccountProvider accountProvider;
 
-	public HmacRealm(ShiroCryptoService cryptoService,ShiroStatelessAccountProvider accountProvider){
-		this.cryptoService = cryptoService;
+	public HmacRealm(ShiroStatelessAccountProvider accountProvider){
 		this.accountProvider = accountProvider;
 	}
 	
@@ -58,29 +56,12 @@ public class HmacRealm extends AuthorizingRealm{
 	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-		System.out.println("hmac 认证");
+		// 只认证HmacToken
+		if(!(token instanceof HmacToken)) return null;
 		HmacToken hmacToken = (HmacToken)token;
 		String appId = hmacToken.getAppId();
-		// 此处可以查询数据 检是否存在该账号、查该账号是否被锁定、该账号是否被禁用
-		Long now = System.currentTimeMillis();
-		Long tokenTimestamp = Long.valueOf(hmacToken.getTimestamp());
-		// 十分钟之前的时间戳
-		//if ((now-tokenTimestamp) > 600000) {
-		//	throw new AuthenticationException(Constants.HMAC_AUTHC_ERROR_MSG);
-		//}
-		// 服务端生成的摘要
-		String serverDigest = cryptoService.hmacDigest(hmacToken.getBaseString()
-												,this.accountProvider.loadAppKey(appId));
-		if(!serverDigest.equals(hmacToken.getDigest())){
-			throw new AuthenticationException(ShiroProperties.MSG_HMAC_AUTHC_ERROR);
-		}
-		StatelessAccount statelessAccount = new StatelessAccount();
-		statelessAccount.setTokenId(hmacToken.getDigest());
-		statelessAccount.setAppId(hmacToken.getAppId());
-		statelessAccount.setHost(hmacToken.getHost());
-		statelessAccount.setIssuedAt(new Date(tokenTimestamp));
-		StatelessThreadContext.setAccount(statelessAccount);
-        return new SimpleAuthenticationInfo(statelessAccount,Boolean.TRUE,getName());
+		String digest = hmacToken.getDigest();
+        return new SimpleAuthenticationInfo(appId,digest,this.getName());
 	}
 	
 	/** 
@@ -88,12 +69,10 @@ public class HmacRealm extends AuthorizingRealm{
      */  
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-		Object principal = principals.getPrimaryPrincipal();
-		if(!(principal instanceof StatelessAccount)) return null;
+		String appId = (String) principals.getPrimaryPrincipal();
 		SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
-		StatelessAccount statelessPrincipal = (StatelessAccount)principal;
-		Set<String> roles = this.accountProvider.loadRoles(statelessPrincipal.getAppId());
-		Set<String> permissions = this.accountProvider.loadPermissions(statelessPrincipal.getAppId());
+		Set<String> roles = this.accountProvider.loadRoles(appId);
+		Set<String> permissions = this.accountProvider.loadPermissions(appId);
 		if(null!=roles&&!roles.isEmpty())
 			info.setRoles(roles);
 		if(null!=permissions&&!permissions.isEmpty())

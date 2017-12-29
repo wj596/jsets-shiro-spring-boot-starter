@@ -21,42 +21,34 @@ import java.util.List;
 import org.jsets.shiro.model.CustomRule;
 import org.jsets.shiro.model.HmacRule;
 import org.jsets.shiro.model.JwtRule;
-import org.jsets.shiro.model.PermRule;
-import org.jsets.shiro.model.RoleRule;
+import org.jsets.shiro.model.RolePermRule;
 
 /**
- * 过滤规则提供者
+ * 动态过滤规则提供者接口
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
 public interface ShiroFilteRulesProvider  {
 	/**
-	 * 加载基于角色的过滤规则
+	 * 加载基于角色/资源的过滤规则
 	 * <br>大部分系统的安全体系都是RBAC(基于角色的权限访问控制)授权模型。
 	 * <br>即：用户--角色--资源(URL),对应关系可配并且存储在数据库中。
-	 * <br>此方法提供的数据为：RoleRule{url资源地址、needRoles需要的角色列表}
+	 * <br>此方法提供的数据为：RolePermRule{url资源地址、needRoles需要的角色列表}
 	 * <br>在shiro中生成的过滤器链为：url=roles[角色1、角色2、角色n]
 	 * <br>当用户持有[角色1、角色2、角色n]中的任何一个角色，则给予访问，否则不予访问
-	 * @return  @see org.jsets.shiro.model.RoleRule
-	 *
-	 */
-	/**
-	 * @return
-	 */
-	public List<RoleRule> loadRoleRules();
-	/**
-	 * 加载基于权限的过滤规则
+	 * 
 	 * <br>权限指用户能操作资源的统称、角色则说权限的集合。
-	 * <br>RBAC授权模型可以表示为：用户--角色--资源(URL)。
 	 * <br>权限授权模型直接表示为：用户--资源(URL)。
 	 * <br>此方法提供的数据格为：PermRule{url资源地址、needPerms需要的权限列表}
 	 * <br>在shiro中生成的过滤器链为：url=perms[权限编码1、权限编码2、权限编码n]
 	 * <br>当用户持有[权限编码1、权限编码2、权限编码n]中的任何一个权限，则给予访问，否则不予访问
-	 * @return @see org.jsets.shiro.model.PermRule
 	 * 
+	 * @return  @see org.jsets.shiro.model.RolePermRule
+	 *
 	 */
-	public List<PermRule> loadPermRules();
+	public List<RolePermRule> loadRolePermRules();
+
 	/**
 	 * 加载基于HMAC的过滤规则
 	 * <br>HMAC：(散列消息认证码)是一种摘要形式的数字签名方法,通常用在无状态的认证授权中。

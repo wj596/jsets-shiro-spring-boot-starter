@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public class HmacAuthcFilter extends HmacFilter{
+public class HmacAuthcFilter extends StatelessFilter{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HmacAuthcFilter.class);
 
@@ -50,7 +50,7 @@ public class HmacAuthcFilter extends HmacFilter{
 	@Override
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
 		if(isHmacSubmission(request)){
-			AuthenticationToken token = createToken(request, response);
+			AuthenticationToken token = createHmacToken(request, response);
 			try {
 				Subject subject = getSubject(request, response);
 				subject.login(token);

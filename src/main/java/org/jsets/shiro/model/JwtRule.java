@@ -33,6 +33,16 @@ public class JwtRule implements Serializable{
 	private String needRoles;// 访问需要的角色列表(多个角色用逗号分开，不需要角色验证此项为空)
 	private String needPerms;// 访问需要的权限列表(多个权限用逗号分开，不需要权限验证此项为空)
 	
+	
+	public JwtRule(String url){
+		this.url = url;
+	}
+	
+	public JwtRule(String url,String needRoles){
+		this.url = url;
+		this.needRoles = needRoles;
+	}
+	
 	public String getUrl() {
 		return url;
 	}

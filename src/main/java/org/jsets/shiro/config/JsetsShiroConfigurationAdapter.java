@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
@@ -66,7 +67,7 @@ public abstract class JsetsShiroConfigurationAdapter {
 	 *  <br>主要方法：
 	 * 	<br>securityManager.setAccountProvider(accountProvider) 设置账号信息提供者
 	 *	<br>securityManager.setPasswdRetryLimitHandler(passwdRetryLimitHandler) 设置密码连续错误超限处理器
-	 *  <br>其他方法见使用说明文档
+	 *  <br>其他方法@see org.jsets.shiro.config.SecurityManagerConfig
 	 *  <br>
 	 */
 	protected abstract void configure(SecurityManagerConfig securityManager);
@@ -74,7 +75,7 @@ public abstract class JsetsShiroConfigurationAdapter {
 	 *   过滤器链设置
 	 *  <br>主要方法：
 	 * 	<br>filterChainConfig.setShiroFilteRulesProvider(shiroFilteRulesProvider) 设置动态过滤规则提供者
-	 *  <br>其他方法见使用说明文档
+	 *  <br>其他方法@see org.jsets.shiro.config.FilterChainConfig
 	 *  <br>
 	 */
 	protected abstract void configure(FilterChainConfig filterChain);
@@ -82,7 +83,7 @@ public abstract class JsetsShiroConfigurationAdapter {
 	@Autowired
 	private ShiroProperties properties;
 	@Autowired(required=false)
-	private RedisTemplate redisTemplate;
+	private RedisConnectionFactory redisConnectionFactory;
 	
 	@Bean
 	public DefaultWebSessionManager sessionManager() {
@@ -103,21 +104,10 @@ public abstract class JsetsShiroConfigurationAdapter {
 		this.jsetsSecurityManager.decideRememberMeCookie(this.properties,rememberMeManager);
 		return rememberMeManager;
 	}
-	
-	@Bean
-	public CacheDelegator cacheDelegator() {
-		CacheDelegator cacheDelegator = new CacheDelegator();
-		CacheManager cacheManager = 
-				this.jsetsSecurityManager.decideCacheManager(this.properties, redisTemplate);
-		cacheDelegator.setCacheManager(cacheManager);
-		this.jsetsSecurityManager.setCacheDelegator(cacheDelegator);
-		return cacheDelegator;
-	}
 
 	@Bean
 	public DefaultWebSecurityManager securityManager(DefaultWebSessionManager sessionManager
 													,CookieRememberMeManager rememberMeManager
-													,CacheDelegator cacheDelegator
 													,ShiroCryptoService cryptoService){
 		
 		DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
@@ -129,17 +119,21 @@ public abstract class JsetsShiroConfigurationAdapter {
 					(DefaultSessionStorageEvaluator)subjectDAO.getSessionStorageEvaluator();
 		JsetsSubjectFactory subjectFactory = new JsetsSubjectFactory(storageEvaluator);
 		securityManager.setSubjectFactory(subjectFactory);
+		CacheDelegator cacheDelegator = new CacheDelegator();
 		CacheManager cacheManager = 
-				this.jsetsSecurityManager.decideCacheManager(this.properties, redisTemplate);
+				this.jsetsSecurityManager.decideCacheManager(this.properties, this.redisConnectionFactory);
 		securityManager.setCacheManager(cacheManager);
+		cacheDelegator.setCacheManager(cacheManager);
+		this.jsetsSecurityManager.setCacheDelegator(cacheDelegator);
 		this.jsetsSecurityManager.decideRealms(this.properties,securityManager,cryptoService,cacheDelegator);
 		SecurityUtils.setSecurityManager(securityManager);
 		return securityManager;
 	}
 	
 	@Bean
-	public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager
-								,DefaultWebSessionManager sessionManager,CacheDelegator cacheDelegator) {
+	public ShiroFilterFactoryBean shiroFilterFactoryBean(
+											DefaultWebSecurityManager securityManager
+											,DefaultWebSessionManager sessionManager) {
 		
 		ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
 		shiroFilterFactoryBean.setSecurityManager(securityManager);

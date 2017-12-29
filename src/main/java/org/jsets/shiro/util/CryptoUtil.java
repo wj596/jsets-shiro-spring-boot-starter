@@ -38,20 +38,30 @@ import io.jsonwebtoken.SignatureAlgorithm;
  * @date 2016年6月31日
  */
 public abstract class CryptoUtil {
+	
+	// HMAC 加密算法名称
+	public static final String HMAC_MD5 = "HmacMD5";// 128位
+	public static final String HMAC_SHA1 = "HmacSHA1";// 126
+	public static final String HMAC_SHA256 = "HmacSHA256";// 256
+	public static final String HMAC_SHA512 = "HmacSHA512";// 512
+	
+	
 	/**
-	 * 签发令牌
+	 * JWT签发令牌
+	 * 
 	 * @param id 令牌ID
 	 * @param subject 用户ID
 	 * @param issuer 签发人
 	 * @param period 有效时间(毫秒)
 	 * @param roles 访问主张-角色
 	 * @param permissions 访问主张-权限
-	 * @param algorithm 加密算法
+	 * @param algorithm 加密算法(SignatureAlgorithm是enum)
 	 * @return json web token 
 	 */
 	public static String issueJwt(String jwtSecretKey,String id
 								  ,String subject,String issuer,Long period,String roles
 									 ,String permissions,SignatureAlgorithm algorithm) {
+
 		// 当前时间戳(精确到毫秒)
 		long currentTimeMillis = System.currentTimeMillis();
 		// 秘钥
@@ -83,15 +93,15 @@ public abstract class CryptoUtil {
 	 * 
 	 * @param plaintext 明文
 	 * @param secretKey 安全秘钥
-	 * @param alg 算法
+	 * @param algName 算法名称
 	 * @return 摘要
 	 */
-	public static String hmacDigest(String plaintext,String secretKey,String alg) {
+	public static String hmacDigest(String plaintext,String secretKey,String algName) {
 		try {
-			Mac mac = Mac.getInstance(alg);
+			Mac mac = Mac.getInstance(algName);
 			byte[] secretByte = secretKey.getBytes();
 			byte[] dataBytes = plaintext.getBytes();
-			SecretKey secret = new SecretKeySpec(secretByte,alg);
+			SecretKey secret = new SecretKeySpec(secretByte,algName);
 			mac.init(secret);
 			byte[] doFinal = mac.doFinal(dataBytes);
 			return byte2HexStr(doFinal);
@@ -100,15 +110,21 @@ public abstract class CryptoUtil {
 		}
 	}
 	
-	private static String byte2HexStr(byte[] b)  { 
-        String stmp=""; 
-        StringBuilder sb = new StringBuilder(""); 
-        for (int n=0;n<b.length;n++) 
-        { 
-            stmp = Integer.toHexString(b[n] & 0xFF); 
-            sb.append((stmp.length()==1)? "0"+stmp : stmp); 
-            sb.append(" "); 
-        } 
-        return sb.toString().toUpperCase().trim(); 
-    }
+	/**
+	 * 字节数组转字符串
+	 * 
+	 * @param bytes 字节数组
+	 * @return 字符串
+	 */
+	private static String byte2HexStr(byte[] bytes) {
+	    StringBuilder hs = new StringBuilder();
+	    String stmp;
+	    for (int n = 0; bytes!=null && n < bytes.length; n++) {
+	        stmp = Integer.toHexString(bytes[n] & 0XFF);
+	        if (stmp.length() == 1)
+	            hs.append('0');
+	        hs.append(stmp);
+	    }
+	    return hs.toString().toUpperCase();
+	}
 }

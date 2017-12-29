@@ -51,7 +51,7 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
-    	System.out.println("    JsetsFormAuthenticationFilter ");
+
     	// 如果已经登陆，还停留在登陆页面，跳转到登陆成功页面
     	if (null != getSubject(request, response) && getSubject(request, response).isAuthenticated()) {
 			if (isLoginRequest(request, response)) {

@@ -19,7 +19,14 @@ package org.jsets.shiro.filter.stateless;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.util.WebUtils;
+import org.jsets.shiro.config.ShiroProperties;
+import org.jsets.shiro.util.Commons;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * 基于JWT标准的无状态过滤器--资源验证过滤器
  * 
@@ -27,24 +34,25 @@ import org.apache.shiro.subject.Subject;
  * @date 2016年6月31日
  * 
  */
-public class JwtPermsFilter extends JwtFilter {
+public class JwtPermsFilter extends StatelessFilter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtPermsFilter.class);
 
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
-        Subject subject = getSubject(request, response);
-        String[] perms = (String[]) mappedValue;
-        boolean isPermitted = true;
-        if (perms != null && perms.length > 0) {
-            if (perms.length == 1) {
-                if (!subject.isPermitted(perms[0])) {
-                    isPermitted = false;
-                }
-            } else {
-                if (!subject.isPermittedAll(perms)) {
-                    isPermitted = false;
-                }
-            }
-        }
-        return isPermitted;
+		Subject subject = getSubject(request, response); 
+		if ((null == subject || !subject.isAuthenticated()) && isJwtSubmission(request)) {
+			AuthenticationToken token = createJwtToken(request, response);
+			try {
+				subject = getSubject(request, response);
+				subject.login(token);
+				return this.checkPerms(subject,mappedValue);
+			} catch (AuthenticationException e) {
+				LOGGER.error(e.getMessage(),e);
+				Commons.restFailed(WebUtils.toHttp(response)
+									   ,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
+			}	
+		}
+		return false;
 	}
 }

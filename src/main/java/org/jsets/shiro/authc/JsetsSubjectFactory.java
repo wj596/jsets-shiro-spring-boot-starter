@@ -45,7 +45,6 @@ public class JsetsSubjectFactory extends DefaultWebSubjectFactory {
     	this.storageEvaluator.setSessionStorageEnabled(Boolean.TRUE);
     	AuthenticationToken token = context.getAuthenticationToken();
     	if(Commons.isStatelessToken(token)){
-    		System.out.println("non session");
             // 不创建 session 
             context.setSessionCreationEnabled(false);
             // 不持久化session

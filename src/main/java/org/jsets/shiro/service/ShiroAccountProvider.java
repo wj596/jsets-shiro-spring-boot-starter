@@ -30,7 +30,7 @@ import org.jsets.shiro.model.Account;
 public interface ShiroAccountProvider {
 	/**
 	 * 根据用户名获取账号信息
-	 * @return 账号信如果查找不到用户返回null
+	 * @return 账号信如果查找不到用户返回null或者直接抛出AuthenticationException
 	 * @param userId息
 	 * @see org.jsets.weblite.core.security.Account
 	 */

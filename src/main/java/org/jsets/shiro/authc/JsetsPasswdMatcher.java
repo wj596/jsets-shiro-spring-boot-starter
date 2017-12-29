@@ -56,13 +56,16 @@ public class JsetsPasswdMatcher implements CredentialsMatcher {
 		String encrypted  = this.cryptoService.password(credentials);
 		if (!password.equals(encrypted)) {
 			int passwdMaxRetries = this.shiroProperties.getPasswdMaxRetries();
-			String errorMsg = "用户名或密码错误";
+			String errorMsg = ShiroProperties.MSG_ACCOUNT_AUTHC_ERROR;
 			if (passwdMaxRetries > 0 && null != this.retryLimitHandler) {
+				errorMsg =ShiroProperties.MSG_ACCOUNT_AUTHC_ERROR;
 				int passwdRetries = this.cacheDelegator.incPasswdRetryCount(account);
 				if (passwdRetries >= passwdMaxRetries-1) {
 					this.retryLimitHandler.handle(account);
 				}
-				errorMsg = "密码错误,您还可以重试 " + (passwdMaxRetries - passwdRetries) + " 次";
+				int remain = passwdMaxRetries - passwdRetries;
+				errorMsg = errorMsg.replace("{total}", String.valueOf(passwdMaxRetries))
+								   .replace("{remain}", String.valueOf(remain));
 			}
 			throw new AuthenticationException(errorMsg);
 		}

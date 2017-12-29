@@ -28,13 +28,24 @@ import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.token.StatelessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.impl.DefaultHeader;
+import io.jsonwebtoken.impl.DefaultJwsHeader;
+import io.jsonwebtoken.impl.TextCodec;
+import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
+import io.jsonwebtoken.lang.Assert;
+
 
 /**
- * 系统工具
+ * 辅助工具类
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
@@ -44,6 +55,9 @@ public abstract class Commons {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Commons.class);
 
+	private static final ObjectMapper MAPPER = new ObjectMapper(); 
+	private static CompressionCodecResolver CODECRESOLVER = new DefaultCompressionCodecResolver();
+	
 	/**
 	 * 判断是否AJAX请求
 	 */
@@ -142,5 +156,97 @@ public abstract class Commons {
 	 */
 	public static boolean isStatelessToken(Object token){
 		return token instanceof StatelessToken;
+	}
+	
+	/**
+	 * 对象转JSON
+	 */
+	public static String toJson(Object object){
+		try {
+			 return MAPPER.writeValueAsString(object);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		} 
+		return null;
+	}
+
+	/**
+	 * JSON转对象
+	 */
+	public static <T> T fromJson(String json,Class<T> valueType){
+		try {
+			return MAPPER.readValue(json,valueType);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return null;
+	}
+	
+	/**
+	 * 解析JWT的Payload
+	 */
+	public static String parseJwtPayload(String jwt){
+        Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
+        String base64UrlEncodedHeader = null;
+        String base64UrlEncodedPayload = null;
+        String base64UrlEncodedDigest = null;
+        int delimiterCount = 0;
+        StringBuilder sb = new StringBuilder(128);
+        for (char c : jwt.toCharArray()) {
+            if (c == '.') {
+                CharSequence tokenSeq = io.jsonwebtoken.lang.Strings.clean(sb);
+                String token = tokenSeq!=null?tokenSeq.toString():null;
+
+                if (delimiterCount == 0) {
+                    base64UrlEncodedHeader = token;
+                } else if (delimiterCount == 1) {
+                    base64UrlEncodedPayload = token;
+                }
+
+                delimiterCount++;
+                sb.setLength(0);
+            } else {
+                sb.append(c);
+            }
+        }
+        if (delimiterCount != 2) {
+            String msg = "JWT strings must contain exactly 2 period characters. Found: " + delimiterCount;
+            throw new MalformedJwtException(msg);
+        }
+        if (sb.length() > 0) {
+            base64UrlEncodedDigest = sb.toString();
+        }
+        if (base64UrlEncodedPayload == null) {
+            throw new MalformedJwtException("JWT string '" + jwt + "' is missing a body/payload.");
+        }
+        // =============== Header =================
+        Header header = null;
+        CompressionCodec compressionCodec = null;
+        if (base64UrlEncodedHeader != null) {
+            String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
+            Map<String, Object> m = readValue(origValue);
+            if (base64UrlEncodedDigest != null) {
+                header = new DefaultJwsHeader(m);
+            } else {
+                header = new DefaultHeader(m);
+            }
+            compressionCodec = CODECRESOLVER.resolveCompressionCodec(header);
+        }
+        // =============== Body =================
+        String payload;
+        if (compressionCodec != null) {
+            byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
+            payload = new String(decompressed, io.jsonwebtoken.lang.Strings.UTF_8);
+        } else {
+            payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        }
+        return payload;
+    }
+	public static Map<String, Object> readValue(String val) {
+	     try {
+	            return MAPPER.readValue(val, Map.class);
+	     } catch (IOException e) {
+	            throw new MalformedJwtException("Unable to read JSON value: " + val, e);
+	     }
 	}
 }

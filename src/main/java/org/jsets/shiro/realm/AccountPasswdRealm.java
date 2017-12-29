@@ -29,21 +29,21 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.Account;
-import org.jsets.shiro.model.StatelessAccount;
 import org.jsets.shiro.service.ShiroAccountProvider;
 
 /**
- * 用户、名密码的控制域
+ * 基于用户、名密码的控制域
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public class PasswdRealm extends AuthorizingRealm {
+public class AccountPasswdRealm extends AuthorizingRealm {
 	
 	private final ShiroAccountProvider accountProvider;
 	
-	public PasswdRealm(ShiroAccountProvider accountProvider){
+	public AccountPasswdRealm(ShiroAccountProvider accountProvider){
 		this.accountProvider = accountProvider;
+		this.afterCacheManagerSet();
 	}
 
 	public Class<?> getAuthenticationTokenClass() {
@@ -56,12 +56,12 @@ public class PasswdRealm extends AuthorizingRealm {
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 		if(null==token.getPrincipal()||null==token.getCredentials()){
-			throw new AuthenticationException(ShiroProperties.MSG_AUTHC_ERROR);
+			throw new AuthenticationException(ShiroProperties.MSG_ACCOUNT_PASSWD_NULL);
 		}
 		String account = (String) token.getPrincipal();
 		Account accountEntity = this.accountProvider.loadAccount(account);
 		if (null == accountEntity) {
-			throw new AuthenticationException(ShiroProperties.MSG_AUTHC_ERROR);
+			throw new AuthenticationException(ShiroProperties.MSG_ACCOUNT_NOTFOUND);
 		}
 		return new SimpleAuthenticationInfo(account,accountEntity.getPassword(), getName());
 	}
@@ -71,10 +71,8 @@ public class PasswdRealm extends AuthorizingRealm {
 	 */
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-		Object principal = principals.getPrimaryPrincipal();
-		if(principal instanceof StatelessAccount) return null;
+		String account = (String) principals.getPrimaryPrincipal();
 		SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
-		String account = (String) principal;
 		Set<String> roles = this.accountProvider.loadRoles(account);
 		Set<String> permissions = this.accountProvider.loadPermissions(account);
 		if(null!=roles&&!roles.isEmpty())

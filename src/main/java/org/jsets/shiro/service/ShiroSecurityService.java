@@ -27,11 +27,11 @@ import org.apache.shiro.session.Session;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.DefaultSessionKey;
 import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.jsets.shiro.authc.StatelessLocal;
 import org.jsets.shiro.config.JsetsSecurityManager;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.Account;
 import org.jsets.shiro.model.StatelessAccount;
-import org.jsets.shiro.realm.StatelessThreadContext;
 import org.jsets.shiro.service.ShiroCryptoService;
 import org.jsets.shiro.util.CryptoUtil;
 import org.slf4j.Logger;
@@ -40,11 +40,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.collect.Lists;
 import io.jsonwebtoken.SignatureAlgorithm;
 /**
- * 安全相关功能提供者
- * <br>这是一个聚合的工具类，将与shiro安全相关的功能提供给应用系统
+ * 
+ * 安全功能聚合服务类
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
+ * 
  */ 
 public class ShiroSecurityService {
 	
@@ -108,7 +109,7 @@ public class ShiroSecurityService {
 		if(null != currentSession){
 			return (Account) currentSession.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_CURRENT_USER);
 		} else{
-			return StatelessThreadContext.getAccount();
+			return StatelessLocal.getAccount();
 		}
 	}
 	/**

@@ -17,14 +17,11 @@
  */
 package org.jsets.shiro.filter.stateless;
 
-import java.util.List;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.CollectionUtils;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
@@ -36,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public class HmacRolesFilter extends HmacFilter{
+public class HmacRolesFilter extends StatelessFilter{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HmacAuthcFilter.class);
 
@@ -45,7 +42,7 @@ public class HmacRolesFilter extends HmacFilter{
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
 		Subject subject = getSubject(request, response); 
 		if ((null == subject || !subject.isAuthenticated()) && isHmacSubmission(request)) {
-			AuthenticationToken token = createToken(request, response);
+			AuthenticationToken token = createHmacToken(request, response);
 			try {
 				subject = getSubject(request, response);
 				subject.login(token);
@@ -59,37 +56,4 @@ public class HmacRolesFilter extends HmacFilter{
 		return false;
 	}
 
-	@Override
-	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-        Subject subject = getSubject(request, response);
-        //未认证
-        if (null == subject || !subject.isAuthenticated()) {
-        	Commons.restFailed(WebUtils.toHttp(response)
-        									,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
-        									,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
-        //未授权
-        } else {
-    		Commons.restFailed(WebUtils.toHttp(response)
-											,ShiroProperties.REST_CODE_AUTH_FORBIDDEN
-											,ShiroProperties.REST_MESSAGE_AUTH_FORBIDDEN);
-        }
-        return false;
-	}
-	
-	private boolean checkRoles(Subject subject, Object mappedValue){
-        String[] rolesArray = (String[]) mappedValue;
-        if (rolesArray == null || rolesArray.length == 0) {
-            return true;
-        }
-        List<String> roles = CollectionUtils.asList(rolesArray);
-        System.out.println("checkRoles:"+roles);
-        boolean[] hasRoles = subject.hasRoles(roles);
-        for(boolean hasRole:hasRoles){
-        	if(hasRole) return true;
-        }
-        return false;
-	}
-	
-	
-	
 }

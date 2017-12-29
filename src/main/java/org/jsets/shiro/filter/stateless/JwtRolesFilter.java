@@ -19,68 +19,42 @@ package org.jsets.shiro.filter.stateless;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.config.ShiroProperties;
-import org.jsets.shiro.token.JwtToken;
 import org.jsets.shiro.util.Commons;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.base.Strings;
-
 /**
- * 基于JWT标准的无状态过滤器--角色验证过滤器
+ * 基于JWT(JSON WEB TOKEN)的无状态过滤器--角色验证过滤器
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
- * 
- */ 
-public class JwtRolesFilter extends AccessControlFilter {
+ */
+public class JwtRolesFilter extends StatelessFilter {
 	
-	private static final Logger log = LoggerFactory.getLogger(AccessControlFilter.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtRolesFilter.class);
+
 
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
-		if (null != getSubject(request, response) 
-				&& getSubject(request, response).isAuthenticated()) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-		if(isJwtSubmission(request)){
-			AuthenticationToken token = createToken(request, response);
+		Subject subject = getSubject(request, response); 
+		if ((null == subject || !subject.isAuthenticated()) && isJwtSubmission(request)) {
+			AuthenticationToken token = createJwtToken(request, response);
 			try {
-				Subject subject = getSubject(request, response);
+				subject = getSubject(request, response);
 				subject.login(token);
-				return true;
+				return this.checkRoles(subject,mappedValue);
 			} catch (AuthenticationException e) {
-				log.error(e.getMessage(),e);
+				LOGGER.error(e.getMessage(),e);
 				Commons.restFailed(WebUtils.toHttp(response)
-								,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
-			} 
+										,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
+			}	
 		}
-		Commons.restFailed(WebUtils.toHttp(response)
-								,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
-								,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
 		return false;
 	}
 
-	protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) {
-		String jwt = request.getParameter(ShiroProperties.PARAM_JWT);
-		String host = request.getRemoteHost();
-		return new JwtToken(jwt, host);
-	}
-	
-	protected boolean isJwtSubmission(ServletRequest request) {
-		String jwt = request.getParameter(ShiroProperties.PARAM_JWT);
-		return (request instanceof HttpServletRequest) && !Strings.isNullOrEmpty(jwt);
-	}
-	
+
 }
