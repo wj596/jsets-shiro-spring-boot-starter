@@ -21,6 +21,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.StatelessAccount;
 import org.jsets.shiro.service.ShiroCryptoService;
@@ -34,10 +35,12 @@ import io.jsonwebtoken.SignatureException;
  * @date 2016年6月31日
  */
 public class JsetsJwtMatcher implements CredentialsMatcher {
-
+	
+	private final ShiroProperties shiroProperties;
 	private final ShiroCryptoService cryptoService;
 
-	public JsetsJwtMatcher(ShiroCryptoService cryptoService){
+	public JsetsJwtMatcher(ShiroProperties shiroProperties,ShiroCryptoService cryptoService){
+		this.shiroProperties = shiroProperties;
 		this.cryptoService = cryptoService;
 	}
 	
@@ -48,14 +51,14 @@ public class JsetsJwtMatcher implements CredentialsMatcher {
 		try{
 			statelessAccount = this.cryptoService.parseJwt(jwt);
 		} catch(SignatureException e){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_SIGNATURE);
+			throw new AuthenticationException(shiroProperties.getJwtSecretKey());
 		} catch(ExpiredJwtException e){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_TIMEOUT);
+			throw new AuthenticationException(MessageConfig.instance().getMsgJwtTimeout());
 		} catch(Exception e){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_AUTHC_ERROR);
+			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
 		}
 		if(null == statelessAccount){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_AUTHC_ERROR);
+			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
 		}
 		// 可以做签发方验证
 		// 可以做接收方验证

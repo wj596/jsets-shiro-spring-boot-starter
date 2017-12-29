@@ -27,6 +27,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.token.JwtToken;
 import org.jsets.shiro.util.Commons;
@@ -43,6 +44,12 @@ public class JwtRealm extends AuthorizingRealm{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtRealm.class);
 	
+	private final ShiroProperties shiroProperties;
+	
+	public JwtRealm(ShiroProperties shiroProperties){
+		this.shiroProperties = shiroProperties;
+	}
+	
 	public Class<?> getAuthenticationTokenClass() {
 		return JwtToken.class;
 	}
@@ -52,6 +59,7 @@ public class JwtRealm extends AuthorizingRealm{
 	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+		LOGGER.info("JWT 认证开始");
 		// 只认证JwtToken
 		if(!(token instanceof JwtToken)) return null;
 		String jwt = ((JwtToken)token).getJwt();
@@ -61,12 +69,12 @@ public class JwtRealm extends AuthorizingRealm{
 			// 没有做任何的签名校验
 			 payload = Commons.parseJwtPayload(jwt);
 		} catch(MalformedJwtException e){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_MALFORMED);
+			throw new AuthenticationException(MessageConfig.instance().getMsgJwtMalformed());
 		} catch(Exception e){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_AUTHC_ERROR);
+			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
 		}
 		if(null == payload){
-			throw new AuthenticationException(ShiroProperties.MSG_JWT_AUTHC_ERROR);
+			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
 		}
 		return new SimpleAuthenticationInfo("jwt:"+payload,jwt,this.getName());
 	}
@@ -76,6 +84,7 @@ public class JwtRealm extends AuthorizingRealm{
      */  
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+		LOGGER.info("JWT 授权开始");
 		String payload = (String) principals.getPrimaryPrincipal();
 		// likely to be json, parse it:
 		if (payload.startsWith("jwt:") && payload.charAt(4) == '{' 

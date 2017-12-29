@@ -25,6 +25,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.StringUtils;
 import org.apache.shiro.web.filter.authz.AuthorizationFilter;
 import org.apache.shiro.web.util.WebUtils;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 /**
@@ -42,8 +43,8 @@ public abstract class JsetsAuthorizationFilter extends AuthorizationFilter{
     		if (Commons.isAjax(WebUtils.toHttp(request))) {
     			Commons.ajaxFailed(WebUtils.toHttp(response) 
     					,HttpServletResponse.SC_UNAUTHORIZED
-    					,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
-    					,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
+    					,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED
+    					,MessageConfig.REST_MESSAGE_AUTH_UNAUTHORIZED);
     		}
             saveRequestAndRedirectToLogin(request, response);
         //未授权
@@ -51,8 +52,8 @@ public abstract class JsetsAuthorizationFilter extends AuthorizationFilter{
     		if (Commons.isAjax(WebUtils.toHttp(request))) {
     			Commons.ajaxFailed(WebUtils.toHttp(response) 
     					,HttpServletResponse.SC_FORBIDDEN
-    					,ShiroProperties.REST_CODE_AUTH_FORBIDDEN
-    					,ShiroProperties.REST_MESSAGE_AUTH_FORBIDDEN);
+    					,MessageConfig.REST_CODE_AUTH_FORBIDDEN
+    					,MessageConfig.REST_MESSAGE_AUTH_FORBIDDEN);
     		}else{
                 String unauthorizedUrl = getUnauthorizedUrl();
                 if (StringUtils.hasText(unauthorizedUrl)) {

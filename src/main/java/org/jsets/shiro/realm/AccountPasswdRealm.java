@@ -27,6 +27,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.Account;
 import org.jsets.shiro.service.ShiroAccountProvider;
@@ -39,11 +40,12 @@ import org.jsets.shiro.service.ShiroAccountProvider;
  */
 public class AccountPasswdRealm extends AuthorizingRealm {
 	
+	private final ShiroProperties shiroProperties;
 	private final ShiroAccountProvider accountProvider;
 	
-	public AccountPasswdRealm(ShiroAccountProvider accountProvider){
+	public AccountPasswdRealm(ShiroProperties shiroProperties,ShiroAccountProvider accountProvider){
+		this.shiroProperties = shiroProperties;
 		this.accountProvider = accountProvider;
-		this.afterCacheManagerSet();
 	}
 
 	public Class<?> getAuthenticationTokenClass() {
@@ -56,12 +58,12 @@ public class AccountPasswdRealm extends AuthorizingRealm {
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 		if(null==token.getPrincipal()||null==token.getCredentials()){
-			throw new AuthenticationException(ShiroProperties.MSG_ACCOUNT_PASSWD_NULL);
+			throw new AuthenticationException("账号和密码均不能为空");
 		}
 		String account = (String) token.getPrincipal();
 		Account accountEntity = this.accountProvider.loadAccount(account);
 		if (null == accountEntity) {
-			throw new AuthenticationException(ShiroProperties.MSG_ACCOUNT_NOTFOUND);
+			throw new AuthenticationException(MessageConfig.instance().getMsgAccountNotExist());
 		}
 		return new SimpleAuthenticationInfo(account,accountEntity.getPassword(), getName());
 	}

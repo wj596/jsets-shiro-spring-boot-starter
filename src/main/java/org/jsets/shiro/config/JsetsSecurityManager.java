@@ -187,7 +187,7 @@ public class JsetsSecurityManager {
 		JsetsPasswdMatcher passwdMatcher = new JsetsPasswdMatcher(properties,cacheDelegator,cryptoService
 															  ,this.getSecurityConfig().getPasswdRetryLimitHandler());
 		
-		AccountPasswdRealm accountPasswdRealm = new AccountPasswdRealm(this.getSecurityConfig().getAccountProvider());
+		AccountPasswdRealm accountPasswdRealm = new AccountPasswdRealm(properties,this.getSecurityConfig().getAccountProvider());
 		accountPasswdRealm.setCredentialsMatcher(passwdMatcher);
 		if (properties.isAuthCacheEnabled()) {
 			accountPasswdRealm.setAuthorizationCacheName(ShiroProperties.CACHE_NAME_AUTHORIZATION);
@@ -214,8 +214,8 @@ public class JsetsSecurityManager {
 			useRealms.add(hmacRealm);
 		}
 		if (properties.isJwtEnabled()) {
-			JsetsJwtMatcher jwtMatcher = new JsetsJwtMatcher(cryptoService);
-			JwtRealm jwtRealm = new JwtRealm();
+			JsetsJwtMatcher jwtMatcher = new JsetsJwtMatcher(properties,cryptoService);
+			JwtRealm jwtRealm = new JwtRealm(properties);
 			jwtRealm.setCredentialsMatcher(jwtMatcher);
 			jwtRealm.setCachingEnabled(Boolean.FALSE);
 			useRealms.add(jwtRealm);

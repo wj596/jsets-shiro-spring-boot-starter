@@ -26,6 +26,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.util.JCaptchaUtil;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 	protected boolean onLoginSuccess(AuthenticationToken token, Subject subject, ServletRequest request,ServletResponse response) throws Exception {
 		if (Commons.isAjax(WebUtils.toHttp(request))) {
 			Commons.ajaxSucceed(WebUtils.toHttp(response)
-					, ShiroProperties.REST_CODE_AUTH_SUCCEED, ShiroProperties.REST_MESSAGE_AUTH_SUCCEED);
+					, MessageConfig.REST_CODE_AUTH_SUCCEED, MessageConfig.REST_MESSAGE_AUTH_SUCCEED);
 		} else {
 			issueSuccessRedirect(request, response);
 		}
@@ -105,7 +106,7 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 			ServletResponse response) {
 		if (Commons.isAjax(WebUtils.toHttp(request))) {
 			Commons.ajaxFailed(WebUtils.toHttp(response),HttpServletResponse.SC_UNAUTHORIZED
-									, ShiroProperties.REST_CODE_AUTH_LOGIN_ERROR, e.getMessage());
+									, MessageConfig.REST_CODE_AUTH_LOGIN_ERROR, e.getMessage());
 			return false;// 过滤器链停止
 		}
 		setFailureAttribute(request, e);
@@ -116,7 +117,7 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 	protected boolean onJcaptchaFailure(ServletRequest request, ServletResponse response,String message) {
 		if (Commons.isAjax(WebUtils.toHttp(request))) {
 			Commons.ajaxFailed(WebUtils.toHttp(response),HttpServletResponse.SC_UNAUTHORIZED
-											, ShiroProperties.REST_CODE_AUTH_LOGIN_ERROR, message);
+											, MessageConfig.REST_CODE_AUTH_LOGIN_ERROR, message);
 			return false;// 过滤器链停止
 		}
 		Commons.setAuthMessage(request,message);

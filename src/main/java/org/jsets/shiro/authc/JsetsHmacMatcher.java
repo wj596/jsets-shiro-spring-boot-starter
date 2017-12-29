@@ -22,6 +22,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.StatelessAccount;
 import org.jsets.shiro.service.ShiroCryptoService;
@@ -54,18 +55,18 @@ public class JsetsHmacMatcher implements CredentialsMatcher {
 		String digest = (String) info.getCredentials();
 		String serverDigest = cryptoService.hmacDigest(hmacToken.getBaseString(),this.accountProvider.loadAppKey(appId));
 		if(!serverDigest.equals(digest)){
-			throw new AuthenticationException(ShiroProperties.MSG_HMAC_AUTHC_ERROR);
+			throw new AuthenticationException(MessageConfig.instance().getMsgHmacError());
 		}
 		Long currentTimeMillis = System.currentTimeMillis();
 		Long tokenTimestamp = Long.valueOf(hmacToken.getTimestamp());
 		// 数字签名超时失效
-		if ((currentTimeMillis-tokenTimestamp) > this.shiroProperties.getHmacDigestTimeout()) {
-			throw new AuthenticationException(ShiroProperties.MSG_HMAC_DIGEST_TIMEOUT);
+		if ((currentTimeMillis-tokenTimestamp) > this.shiroProperties.getHmacPeriod()) {
+			throw new AuthenticationException(MessageConfig.instance().getMsgHmacTimeout());
 		}
 		// 检查账号
 		boolean checkAccount = this.accountProvider.checkAccount(appId);
 		if(!checkAccount){
-			throw new AuthenticationException(ShiroProperties.MSG_ACCOUNT_EXCEPTION);
+			throw new AuthenticationException(MessageConfig.instance().getMsgAccountExcept());
 		}
 		StatelessAccount statelessAccount = new StatelessAccount();
 		statelessAccount.setTokenId(hmacToken.getDigest());

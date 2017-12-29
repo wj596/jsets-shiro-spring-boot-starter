@@ -46,8 +46,7 @@ public class SecurityManagerConfig {
 	private final List<SessionListener> sessionListeners = Lists.newLinkedList();
 	private final List<Realm> realms = Lists.newLinkedList();
 	
-	
-	
+
 	/**
 	 * 设置账号信息提供者
 	 * @param accountProviderImpl  see org.jsets.shiro.service.ShiroAccountProvider

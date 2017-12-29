@@ -23,6 +23,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 /**
@@ -41,8 +42,8 @@ public abstract class JsetsAccessControlFilter extends AccessControlFilter{
 		if (Commons.isAjax(WebUtils.toHttp(request))) {
 			Commons.ajaxFailed(WebUtils.toHttp(response)
 								,HttpServletResponse.SC_UNAUTHORIZED
-								,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
-								,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
+								,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED
+								,MessageConfig.REST_MESSAGE_AUTH_UNAUTHORIZED);
 			return false;// 过滤器链停止
 		}
 		saveRequestAndRedirectToLogin(request, response);

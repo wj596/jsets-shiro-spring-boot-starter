@@ -23,6 +23,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.WebUtils;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class JwtRolesFilter extends StatelessFilter {
 			} catch (AuthenticationException e) {
 				LOGGER.error(e.getMessage(),e);
 				Commons.restFailed(WebUtils.toHttp(response)
-										,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
+										,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
 			}	
 		}
 		return false;

@@ -28,6 +28,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.CollectionUtils;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.token.HmacToken;
 import org.jsets.shiro.token.JwtToken;
@@ -128,13 +129,13 @@ public abstract class StatelessFilter extends AccessControlFilter{
         //未认证
         if (null == subject || !subject.isAuthenticated()) {
         	Commons.restFailed(WebUtils.toHttp(response)
-        								,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
-        								,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
+        								,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED
+        								,MessageConfig.REST_MESSAGE_AUTH_UNAUTHORIZED);
         //未授权
         } else {
     		Commons.restFailed(WebUtils.toHttp(response)
-										,ShiroProperties.REST_CODE_AUTH_FORBIDDEN
-										,ShiroProperties.REST_MESSAGE_AUTH_FORBIDDEN);
+										,MessageConfig.REST_CODE_AUTH_FORBIDDEN
+										,MessageConfig.REST_MESSAGE_AUTH_FORBIDDEN);
         }	
         return false;
 	}
