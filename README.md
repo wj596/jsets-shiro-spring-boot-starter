@@ -8,7 +8,7 @@ springboot环境中使用shiro大都是通过shiro-spring进行的,虽然不是�
 
 jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用少量的配置就可以立即应用到项目中。
 
-目前提供的功能：
+#### 目前提供的功能：
 
 1、spring-boot-starter风格开箱即用
 
@@ -26,12 +26,12 @@ jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用�
 
 8、在线SESSION管理。
 
-计划提供的功能：
+#### 计划提供的功能：
 
 1、CAS单点登陆集成
 
 2、oauth2.0支持
 
-### [快速开始](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B?_blank)
+#### [快速开始](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B?_blank)
 
 #### 使用说明
