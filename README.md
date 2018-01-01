@@ -38,4 +38,4 @@ jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用�
 
 #### [使用说明](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki) 
 
-#### 示例项目
+#### [示例项目](https://github.com/wj596/jsets-shiro-demo)
