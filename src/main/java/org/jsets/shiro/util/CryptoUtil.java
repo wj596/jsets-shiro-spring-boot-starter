@@ -44,8 +44,7 @@ public abstract class CryptoUtil {
 	public static final String HMAC_SHA1 = "HmacSHA1";// 126
 	public static final String HMAC_SHA256 = "HmacSHA256";// 256
 	public static final String HMAC_SHA512 = "HmacSHA512";// 512
-	
-	
+
 	/**
 	 * JWT签发令牌
 	 * 
@@ -60,7 +59,7 @@ public abstract class CryptoUtil {
 	 */
 	public static String issueJwt(String jwtSecretKey,String id
 								  ,String subject,String issuer,Long period,String roles
-									 ,String permissions,SignatureAlgorithm algorithm) {
+								  ,String permissions,SignatureAlgorithm algorithm) {
 
 		// 当前时间戳(精确到毫秒)
 		long currentTimeMillis = System.currentTimeMillis();

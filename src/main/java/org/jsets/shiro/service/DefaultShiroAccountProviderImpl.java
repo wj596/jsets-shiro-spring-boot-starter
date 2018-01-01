@@ -38,9 +38,9 @@ public class DefaultShiroAccountProviderImpl implements ShiroAccountProvider {
 		this.shiroCryptoService = shiroCryptoService;
 	}
 	
-	protected static final String DEFAULT_ACCOUNT = "test";
-	protected static final String DEFAULT_ROLES = "testRole";
-	protected static final String DEFAULT_PERMS = "testPerm";
+	public static final String DEFAULT_ACCOUNT = "test";
+	public static final String DEFAULT_ROLES = "testRole";
+	public static final String DEFAULT_PERMS = "testPerm";
 
 	@Override
 	public Account loadAccount(String account) throws AuthenticationException {

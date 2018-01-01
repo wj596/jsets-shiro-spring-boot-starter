@@ -39,10 +39,12 @@ public class DefaultShiroConfiguration extends JsetsShiroConfigurationAdapter{
 	
 	@Override
 	protected void configure(SecurityManagerConfig securityManager) {
+		
 		ShiroAccountProvider accountProvider 
 							= new DefaultShiroAccountProviderImpl(this.shiroCryptoService);
 		securityManager.setAccountProvider(accountProvider);
-		
+		System.out.println("欢迎使用： jsets-shiro-spring-boot-starter");
+		System.out.println("已为您创建体验账号： test,密码test");
 	}
 
 	@Override

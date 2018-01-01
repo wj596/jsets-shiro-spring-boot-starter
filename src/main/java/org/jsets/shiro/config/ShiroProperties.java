@@ -70,10 +70,13 @@ public class ShiroProperties {
 	public static final String ATTRIBUTE_SESSION_FORCE_LOGOUT = "shiro_force_logout_attribute";
 	public static final String ATTRIBUTE_REQUEST_AUTH_MESSAGE = "shiro_auth_message";
 	//  PARAM名称
+	public static final String PARAM_JCAPTCHA = "jcaptcha";
 	public static final String PARAM_HMAC_APP_ID = "hmac_app_id";
 	public static final String PARAM_HMAC_TIMESTAMP = "hmac_timestamp";
 	public static final String PARAM_HMAC_DIGEST = "hmac_digest";
 	public static final String PARAM_JWT = "jwt";
+	
+	
 	
 	public static final List<String> DEFAULT_IGNORED = Arrays.asList(
 													"/**/favicon.ico"
@@ -81,7 +84,7 @@ public class ShiroProperties {
 													,"/js/**"
 													,"/images/**"
 													,"/webjars/**"
-													,"/jcaptcha*");
+													,"/jcaptcha.jpg");
 	
 	private boolean jcaptchaEnable = Boolean.FALSE; // 是否启用验证码
 	private boolean keepOneEnabled = Boolean.FALSE; // 是否启用账号唯一用户登陆

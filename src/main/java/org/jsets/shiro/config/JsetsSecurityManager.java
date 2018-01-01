@@ -319,6 +319,7 @@ public class JsetsSecurityManager {
 		if (properties.isJcaptchaEnable())
 			filterChainDefinitionMap.put(ShiroProperties.DEFAULT_JCAPTCHA_URL, FILTER_JCAPTCHA);
 		filterChainDefinitionMap.putAll(this.getStaticRules());
+		LOGGER.info("filterChainDefinitionMap:"+filterChainDefinitionMap);
 		this.getShiroFilterFactoryBean().setFilterChainDefinitionMap(filterChainDefinitionMap);
 	}
 

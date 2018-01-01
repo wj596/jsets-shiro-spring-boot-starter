@@ -41,7 +41,6 @@ public class JcaptchaFilter extends OncePerRequestFilter {
 	@Override
 	public void doFilterInternal(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		
 		HttpServletResponse httpResponse = WebUtils.toHttp(response);
 		httpResponse.setHeader("Cache-Control", "no-store"); 
 		httpResponse.setHeader("Pragma", "no-cache"); 

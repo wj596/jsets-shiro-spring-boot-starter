@@ -43,7 +43,6 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsetsFormAuthenticationFilter.class);
 	
-	private final String DEFAULT_JCAPTCHA_PARAM = "shiro-form-jcaptcha";
 	private final ShiroProperties shiroProperties;
 
 	public JsetsFormAuthenticationFilter(ShiroProperties shiroProperties){
@@ -73,9 +72,9 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
             if (isLoginSubmission(request, response)) {//是否登陆请求
                 // 是否启用验证码
                 if(this.shiroProperties.isJcaptchaEnable()){
-                	String jcaptcha = WebUtils.getCleanParam(request, DEFAULT_JCAPTCHA_PARAM);
+                	String jcaptcha = WebUtils.getCleanParam(request, ShiroProperties.PARAM_JCAPTCHA);
                 	if(Strings.isNullOrEmpty(jcaptcha)){
-                		return onJcaptchaFailure(request, response,"验证码为空");
+                		return onJcaptchaFailure(request, response,"验证码不能为空");
                 	}
                 	if(!JCaptchaUtil.validateCaptcha(WebUtils.toHttp(request), jcaptcha)){
                 		return onJcaptchaFailure(request, response,"验证码错误");

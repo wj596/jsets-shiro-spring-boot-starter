@@ -55,8 +55,6 @@ public class JsetsPasswdMatcher implements CredentialsMatcher {
 		String account = (String) info.getPrincipals().getPrimaryPrincipal();
 		String password = (String) info.getCredentials();
 		String encrypted  = this.cryptoService.password(credentials);
-		System.out.println(encrypted);
-		System.out.println(password);
 		if (!password.equals(encrypted)) {
 			int passwdMaxRetries = this.shiroProperties.getPasswdMaxRetries();
 			String errorMsg = MessageConfig.instance().getMsgAuthcError();
@@ -67,7 +65,6 @@ public class JsetsPasswdMatcher implements CredentialsMatcher {
 					this.retryLimitHandler.handle(account);
 				}
 				int remain = passwdMaxRetries - passwdRetries;
-				System.out.println(MessageConfig.instance().getMsgPasswdRetryError());
 				errorMsg = errorMsg.replace("{total}", String.valueOf(passwdMaxRetries))
 								   .replace("{remain}", String.valueOf(remain));
 			}
