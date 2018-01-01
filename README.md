@@ -10,27 +10,27 @@ springboot中使用shiro大都是通过shiro-spring.jar进行的整合的,虽然
 
 jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动导入，使用少量的配置就可以在项目中应用。
 
-#### 目前提供的功能
+#### 实现的功能
 
-1、spring-boot-starter风格开箱即用
+1、spring-boot-starter风格开箱即用支持。
 
-2、集成jcaptcha验证码
+2、集成jcaptcha验证码。
 
-3、密码输入错误重试次数限制。
+3、密码输入错误，重试次数限制。
 
 4、账号唯一用户登陆，一个账号只允许一个用户登陆。
 
-5、REDIS缓存，认证\授权数据缓存同步。
+5、redis缓存支持，认证\授权数据缓存同步。
 
 6、动态URL过滤规则。
 
 7、无状态认证授权，共存有状态和无状态两种鉴权方式，支持JWT(JSON WEB TOKEN)、HMAC(哈希消息认证码)两种协议。
 
-8、在线SESSION管理。
+8、在线SESSION管理，强制下线功能。
 
-#### 计划提供的功能
+#### 计划的功能
 
-1、CAS单点登陆集成
+1、cas单点登陆集成
 
 2、oauth2.0支持
 
