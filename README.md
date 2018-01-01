@@ -32,6 +32,6 @@ jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用�
 
 2、oauth2.0支持
 
-#### 快速开始
+### [快速开始](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B?_blank)
 
 #### 使用说明
