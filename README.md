@@ -2,7 +2,11 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-基于shiro-spring在springboot环境中整合shiro虽然不是太复杂，但也无法做到spring-boot-starter风格的开箱即用。对于开发实践中经常使用的功能如验证码、密码错误次数限制、账号唯一用户登陆、动态URL过滤等，还是需要对shiro的原理和认证体系有较为深入的理解才能进行扩展。jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用少量的配置就可以立即应用到项目中。
+springboot环境中使用shiro大都是通过shiro-spring进行的,虽然不是太复杂，但也无法做到spring-boot-starter风格的开箱即用。
+
+开发实践中经常使用的功能如验证码、密码错误次数限制、账号唯一用户登陆、动态URL过滤等，还是需要对shiro的原理和认证体系有较为深入的理解才能进行扩展
+
+jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用少量的配置就可以立即应用到项目中。
 
 jsets-shiro-spring-boot-starter目前提供的功能：
 
