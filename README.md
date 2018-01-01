@@ -26,7 +26,7 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 7、无状态认证授权，共存有状态和无状态两种鉴权方式，支持JWT(JSON WEB TOKEN)、HMAC(哈希消息认证码)两种协议。
 
-8、在线SESSION管理，强制下线功能。
+8、在线session管理，强制下线功能。
 
 #### 计划的功能
 
