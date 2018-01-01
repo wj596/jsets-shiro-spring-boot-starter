@@ -4,11 +4,11 @@
 
 #### 项目说明
 
-springboot环境中使用shiro大都是通过shiro-spring进行的,虽然不是太复杂，但无法做到spring-boot-starter风格的开箱即用。
+springboot中使用shiro大都是通过shiro-spring.jar进行的整合的,虽然不是太复杂，但是也无法做到spring-boot-starter风格的开箱即用。
 
-开发实践中经常使用的功能如验证码、密码错误次数限制、账号唯一用户登陆、动态URL过滤、无状态鉴权支持等功能还是需要对shiro的原理和认证体系有较为深入的理解才能进行扩展。
+项目中经常用到的功能比如：验证码、密码错误次数限制、账号唯一用户登陆、动态URL过滤规则、无状态鉴权支持等等，shiro还没有直接提供支持。
 
-jsets-shiro-spring-boot-starter对这些进行了封装和自动导入，使用少量的配置就可以立即应用到项目中。
+jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动导入，使用少量的配置就可以在项目中应用。
 
 #### 目前提供的功能
 
