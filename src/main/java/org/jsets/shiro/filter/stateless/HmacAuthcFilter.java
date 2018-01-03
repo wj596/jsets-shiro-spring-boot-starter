@@ -57,7 +57,7 @@ public class HmacAuthcFilter extends StatelessFilter{
 				subject.login(token);
 				return true;
 			} catch (AuthenticationException e) {
-				LOGGER.error(e.getMessage(),e);
+				LOGGER.error(request.getRemoteHost()+" HMAC认证  "+e.getMessage());
 				Commons.restFailed(WebUtils.toHttp(response)
 									,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
 			}

@@ -49,7 +49,7 @@ public class JwtPermsFilter extends StatelessFilter {
 				subject.login(token);
 				return this.checkPerms(subject,mappedValue);
 			} catch (AuthenticationException e) {
-				LOGGER.error(e.getMessage(),e);
+				LOGGER.error(request.getRemoteHost()+" HMAC鉴权  "+e.getMessage());
 				Commons.restFailed(WebUtils.toHttp(response)
 									   ,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
 			}	

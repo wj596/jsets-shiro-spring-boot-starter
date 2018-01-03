@@ -57,7 +57,7 @@ public class JwtAuthcFilter extends StatelessFilter{
 				subject.login(token);
 				return true;
 			} catch (AuthenticationException e) {
-				LOGGER.error(e.getMessage(),e);
+				LOGGER.error(request.getRemoteHost()+" JWT认证  "+e.getMessage());
 				Commons.restFailed(WebUtils.toHttp(response)
 						,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
 			} 
