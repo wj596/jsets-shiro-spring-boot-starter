@@ -19,8 +19,6 @@ package org.jsets.shiro.service;
 
 import java.util.List;
 import org.jsets.shiro.model.CustomRule;
-import org.jsets.shiro.model.HmacRule;
-import org.jsets.shiro.model.JwtRule;
 import org.jsets.shiro.model.RolePermRule;
 
 /**
@@ -55,18 +53,18 @@ public interface ShiroFilteRulesProvider  {
 	 * <br>此方法提供的数据为：HmacRule{url资源地址、needRoles需要的角色列表、needPerms需要的权限列表}
 	 * <br>只需要身份认证不需要角色验证needRoles为空、只需要身份认证不需要权限验证needPerms为空
 	 * <br>在shiro中生成的过滤器链为：url=hmac、url=hmacRoles[needRoles]、url=hmacPerms[needPerms]
-	 * @return @see org.jsets.shiro.model.HmacRule
+	 * @return @see org.jsets.shiro.model.RolePermRule
 	 */
-	public List<HmacRule> loadHmacRules();
+	public List<RolePermRule> loadHmacRules();
 	/**
 	 * 加载基于JWT的过滤规则
 	 * <br>JWT：(JSON WEB TOKEN)是一种开放标准的令牌规范,通常用在无状态的认证授权中。
 	 * <br>此方法提供的数据为：JwtRule{url资源地址、needRoles需要的角色列表、needPerms需要的权限列表}
 	 * <br>只需要身份认证不需要角色验证needRoles为空、只需要身份认证不需要权限验证needPerms为空
 	 * <br>在shiro中生成的过滤器链为：url=jwt、url=jwtRoles[needRoles]、url=jwtPerms[needPerms]
-	 * @return @see org.jsets.shiro.model.JwtRule
+	 * @return @see org.jsets.shiro.model.RolePermRule
 	 */
-	public List<JwtRule> loadJwtRules();
+	public List<RolePermRule> loadJwtRules();
 	/**
 	 * 加载自定义的过滤规则
 	 * <br>此方法提供的数据为：JwtRule{url资源地址、rule过滤规则}

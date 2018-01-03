@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public class HmacPermFilter extends StatelessFilter{
+public class HmacPermsFilter extends StatelessFilter{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(HmacPermFilter.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HmacPermsFilter.class);
 
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {

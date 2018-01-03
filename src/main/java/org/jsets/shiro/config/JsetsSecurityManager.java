@@ -49,12 +49,13 @@ import org.jsets.shiro.filter.JsetsRolesAuthorizationFilter;
 import org.jsets.shiro.filter.JsetsUserFilter;
 import org.jsets.shiro.filter.KeepOneUserFilter;
 import org.jsets.shiro.filter.stateless.HmacAuthcFilter;
+import org.jsets.shiro.filter.stateless.HmacPermsFilter;
 import org.jsets.shiro.filter.stateless.HmacRolesFilter;
 import org.jsets.shiro.filter.stateless.JwtAuthcFilter;
+import org.jsets.shiro.filter.stateless.JwtPermsFilter;
+import org.jsets.shiro.filter.stateless.JwtRolesFilter;
 import org.jsets.shiro.handler.DefaultSessionListener;
 import org.jsets.shiro.model.CustomRule;
-import org.jsets.shiro.model.HmacRule;
-import org.jsets.shiro.model.JwtRule;
 import org.jsets.shiro.model.RolePermRule;
 import org.jsets.shiro.realm.HmacRealm;
 import org.jsets.shiro.realm.JwtRealm;
@@ -100,10 +101,10 @@ public class JsetsSecurityManager {
 	private static final String FILTER_FORCE_LOGOUT = "forceLogout";
 	private static final String FILTER_HMAC = "hmac";
 	private static final String FILTER_HMAC_ROLES = "hmacRoles";
-	private static final String FILTER_HMAC_PERMS = "hmacRoles";
+	private static final String FILTER_HMAC_PERMS = "hmacPerms";
 	private static final String FILTER_JWT = "jwt";
-	private static final String FILTER_JWT_ROLES = "hmacRoles";
-	private static final String FILTER_JWT_PERMS = "hmacRoles";
+	private static final String FILTER_JWT_ROLES = "jwtRoles";
+	private static final String FILTER_JWT_PERMS = "jwtPerms";
 	
 	private SecurityManagerConfig securityConfig;
 	private FilterChainConfig filterChainConfig;
@@ -249,36 +250,42 @@ public class JsetsSecurityManager {
 	protected void decideFilters(final ShiroProperties properties) {
 		Map<String, Filter> filters = Maps.newLinkedHashMap();
 		filters.putAll(this.filterChainConfig.getFilters());
-		
+
 		JsetsFormAuthenticationFilter formAuthenticationFilter = new JsetsFormAuthenticationFilter(properties);
-		filters.putIfAbsent(FILTER_AUTHC, formAuthenticationFilter);
+		if(!filters.containsKey(FILTER_AUTHC))filters.put(FILTER_AUTHC, formAuthenticationFilter);
 		if (properties.isJcaptchaEnable()) {
 			JcaptchaFilter jcaptchaFilter = new JcaptchaFilter();
-			filters.putIfAbsent(FILTER_JCAPTCHA, jcaptchaFilter);
+			if(!filters.containsKey(FILTER_JCAPTCHA))filters.put(FILTER_JCAPTCHA, jcaptchaFilter);
 		}
 		JsetsRolesAuthorizationFilter rolesAuthorizationFilter = new JsetsRolesAuthorizationFilter();
-		filters.putIfAbsent(FILTER_ROLES, rolesAuthorizationFilter);
+		if(!filters.containsKey(FILTER_ROLES))filters.put(FILTER_ROLES, rolesAuthorizationFilter);
 		JsetsPermissionsAuthorizationFilter permissionsAuthorizationFilter = new JsetsPermissionsAuthorizationFilter();
-		filters.putIfAbsent(FILTER_PERMS, permissionsAuthorizationFilter);
+		if(!filters.containsKey(FILTER_PERMS))filters.put(FILTER_PERMS, permissionsAuthorizationFilter);
 		JsetsUserFilter userFilter = new JsetsUserFilter(this.getSecurityConfig().getAccountProvider());
-		filters.putIfAbsent(FILTER_USER, userFilter);
+		if(!filters.containsKey(FILTER_USER))filters.put(FILTER_USER, userFilter);
 		if (properties.isKeepOneEnabled()) {
 			KeepOneUserFilter keepOneUserFilter = new KeepOneUserFilter(properties,this.getSessionManager(),this.getCacheDelegator());
-			filters.putIfAbsent(FILTER_KEEP_ONE, keepOneUserFilter);
+			if(!filters.containsKey(FILTER_KEEP_ONE))filters.put(FILTER_KEEP_ONE, keepOneUserFilter);
 		}
 		if (properties.isForceLogoutEnable()) {
 			ForceLogoutFilter forceLogoutFilter = new ForceLogoutFilter(properties);
-			filters.putIfAbsent(FILTER_FORCE_LOGOUT, forceLogoutFilter);
+			if(!filters.containsKey(FILTER_FORCE_LOGOUT))filters.put(FILTER_FORCE_LOGOUT, forceLogoutFilter);
 		}
 		if (properties.isHmacEnabled()) {
 			HmacAuthcFilter hmacFilter = new HmacAuthcFilter();
-			filters.putIfAbsent(FILTER_HMAC, hmacFilter);
+			if(!filters.containsKey(FILTER_HMAC))filters.put(FILTER_HMAC, hmacFilter);
 			HmacRolesFilter hmacRolesFilter = new HmacRolesFilter();
-			filters.putIfAbsent(FILTER_HMAC_ROLES, hmacRolesFilter);
+			if(!filters.containsKey(FILTER_HMAC_ROLES))filters.put(FILTER_HMAC_ROLES, hmacRolesFilter);
+			HmacPermsFilter hmacPermsFilter = new HmacPermsFilter();
+			if(!filters.containsKey(FILTER_HMAC_PERMS))filters.put(FILTER_HMAC_PERMS, hmacPermsFilter);
 		}
-		if (properties.isHmacEnabled()) {
+		if (properties.isJwtEnabled()) {
 			JwtAuthcFilter jwtFilter = new JwtAuthcFilter();
-			filters.putIfAbsent(FILTER_JWT, jwtFilter);
+			if(!filters.containsKey(FILTER_JWT))filters.put(FILTER_JWT, jwtFilter);
+			JwtRolesFilter jwtRolesFilter = new JwtRolesFilter();
+			if(!filters.containsKey(FILTER_JWT_ROLES))filters.put(FILTER_JWT_ROLES, jwtRolesFilter);
+			JwtPermsFilter jwtPermsFilter = new JwtPermsFilter();
+			if(!filters.containsKey(FILTER_JWT_PERMS))filters.put(FILTER_JWT_PERMS, jwtPermsFilter);
 		}
 		this.getShiroFilterFactoryBean().setFilters(filters);
 	}
@@ -286,7 +293,7 @@ public class JsetsSecurityManager {
 	protected void decideFilteRules(final ShiroProperties properties) {
 		// ------------anon
 		for (String ignored : ShiroProperties.DEFAULT_IGNORED) {
-			this.getAnonRules().putIfAbsent(ignored, FILTER_ANON);
+			this.getAnonRules().put(ignored, FILTER_ANON);
 		}
 		if(!Strings.isNullOrEmpty(properties.getKickoutUrl()))
 			this.getAnonRules().put(properties.getKickoutUrl(), FILTER_ANON);
@@ -297,7 +304,7 @@ public class JsetsSecurityManager {
 			String urls = rules.split("-->")[0];
 			String filters = rules.split("-->")[1];
 			for (String url : urls.split(",")) {
-				this.getStaticRules().putIfAbsent(url, filters);
+				this.getStaticRules().put(url, filters);
 			}
 		}
 		// ------------dynamic
@@ -356,8 +363,8 @@ public class JsetsSecurityManager {
 		Map<String, String> dynamicRules = Maps.newLinkedHashMap();
 		if(null == filteRulesProvider) return dynamicRules;
 		List<RolePermRule> rolePermRules = filteRulesProvider.loadRolePermRules();
-		List<HmacRule> hmacRules = filteRulesProvider.loadHmacRules();
-		List<JwtRule> jwtRules = filteRulesProvider.loadJwtRules();
+		List<RolePermRule> hmacRules = filteRulesProvider.loadHmacRules();
+		List<RolePermRule> jwtRules = filteRulesProvider.loadJwtRules();
 		List<CustomRule> customRules = filteRulesProvider.loadCustomRules();
 		if(null!=rolePermRules&&!rolePermRules.isEmpty()){
             for(RolePermRule rolePermRule : rolePermRules){
@@ -372,12 +379,13 @@ public class JsetsSecurityManager {
             	}
             	if(sb.length()==0) continue;
             	sb.append(this.getAdditionFilters());
-            	dynamicRules.putIfAbsent(rolePermRule.getUrl(), sb.toString());
+            	if(!dynamicRules.containsKey(rolePermRule.getUrl()))
+            		dynamicRules.put(rolePermRule.getUrl(), sb.toString());
     		}
 		}
 
 		if(null!=hmacRules&&!hmacRules.isEmpty()){
-            for(HmacRule hmacRule : hmacRules){
+            for(RolePermRule hmacRule : hmacRules){
             	if(Strings.isNullOrEmpty(hmacRule.getUrl())) continue;
             	StringBuilder sb = new StringBuilder();
             	if(!Strings.isNullOrEmpty(hmacRule.getNeedRoles())){
@@ -390,11 +398,11 @@ public class JsetsSecurityManager {
             	if(sb.length()==0) {
             		sb.append(FILTER_HMAC);
             	}
-            	dynamicRules.putIfAbsent(hmacRule.getUrl(), sb.toString());
+            	if(!dynamicRules.containsKey(hmacRule.getUrl()))dynamicRules.put(hmacRule.getUrl(), sb.toString());
     		}
 		}
 		if(null!=jwtRules&&!jwtRules.isEmpty()){
-			for(JwtRule jwtRule : jwtRules){
+			for(RolePermRule jwtRule : jwtRules){
             	if(Strings.isNullOrEmpty(jwtRule.getUrl())) continue;
             	StringBuilder sb = new StringBuilder();
             	if(!Strings.isNullOrEmpty(jwtRule.getNeedRoles())){
@@ -407,14 +415,15 @@ public class JsetsSecurityManager {
             	if(sb.length()==0) {
             		sb.append(FILTER_JWT);
             	}
-            	dynamicRules.putIfAbsent(jwtRule.getUrl(), sb.toString());
+            	if(!dynamicRules.containsKey(jwtRule.getUrl()))dynamicRules.put(jwtRule.getUrl(), sb.toString());
     		} 
 		}
 		if(null!=customRules&&!customRules.isEmpty()){
             for(CustomRule customRule : customRules){
             	if(Strings.isNullOrEmpty(customRule.getUrl())) continue;
             	if(Strings.isNullOrEmpty(customRule.getRule())) continue;
-            	dynamicRules.putIfAbsent(customRule.getUrl(),customRule.getRule()+this.getAdditionFilters());
+            	if(!dynamicRules.containsKey(customRule.getUrl()))
+            		dynamicRules.put(customRule.getUrl(),customRule.getRule()+this.getAdditionFilters());
     		}
 		}
 		return dynamicRules;

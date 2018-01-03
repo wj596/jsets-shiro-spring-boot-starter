@@ -34,6 +34,12 @@ public class RolePermRule implements Serializable{
 	private String needRoles;// 访问需要的角色列表(多个角色用逗号分开)
 	private String needPerms;// 访问需要的权限列表(多个权限用逗号分开)
 
+	/**
+	 * @param url 访问地址
+	 */
+	public RolePermRule(String url){
+		this.url = url;
+	}
 	
 	/**
 	 * @param url 访问地址
