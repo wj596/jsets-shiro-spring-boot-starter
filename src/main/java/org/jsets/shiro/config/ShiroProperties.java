@@ -45,7 +45,7 @@ public class ShiroProperties {
 	// 默认HASH加密迭代次数
 	protected static final Integer DEFAULT_HASH_ITERATIONS = 2;
 	// 默认记住我cookie加密秘钥
-	protected static final String DEFAULT_REMEMBERME_SECRETKEY = "A1B2C3D4efg.5679g8e7d6c5b4a_-=_)(8.";
+	protected static final String DEFAULT_REMEMBERME_SECRETKEY = "1a2b5c8e6c9e5g2s";
 	// 默认JWT加密算法
 	protected static final String DEFAULT_HMAC_ALGORITHM_NAME = "HmacMD5";
 	// HASH加密算法
