@@ -44,9 +44,11 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsetsFormAuthenticationFilter.class);
 	
 	private final ShiroProperties shiroProperties;
+	private final MessageConfig messages;
 
-	public JsetsFormAuthenticationFilter(ShiroProperties shiroProperties){
+	public JsetsFormAuthenticationFilter(ShiroProperties shiroProperties,MessageConfig messages){
 		this.shiroProperties = shiroProperties;
+		this.messages = messages;
 	}
 
     @Override
@@ -74,10 +76,10 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
                 if(this.shiroProperties.isJcaptchaEnable()){
                 	String jcaptcha = WebUtils.getCleanParam(request, ShiroProperties.PARAM_JCAPTCHA);
                 	if(Strings.isNullOrEmpty(jcaptcha)){
-                		return onJcaptchaFailure(request, response,"验证码不能为空");
+                		return onJcaptchaFailure(request, response,messages.getMsgCaptchaEmpty());
                 	}
                 	if(!JCaptchaUtil.validateCaptcha(WebUtils.toHttp(request), jcaptcha)){
-                		return onJcaptchaFailure(request, response,"验证码错误");
+                		return onJcaptchaFailure(request, response,messages.getMsgCaptchaError());
                 	}
                 }
                 return executeLogin(request, response);

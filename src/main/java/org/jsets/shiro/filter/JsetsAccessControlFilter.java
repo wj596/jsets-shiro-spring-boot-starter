@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 /**
  * 抽象认证过滤器,扩展自AccessControlFilter增加了针对ajax请求的处理。

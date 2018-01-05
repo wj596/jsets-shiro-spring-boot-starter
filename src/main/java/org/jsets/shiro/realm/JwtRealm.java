@@ -44,10 +44,10 @@ public class JwtRealm extends AuthorizingRealm{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtRealm.class);
 	
-	private final ShiroProperties shiroProperties;
+	private final MessageConfig messages;
 	
-	public JwtRealm(ShiroProperties shiroProperties){
-		this.shiroProperties = shiroProperties;
+	public JwtRealm(MessageConfig messages){
+		this.messages = messages;
 	}
 	
 	public Class<?> getAuthenticationTokenClass() {
@@ -69,12 +69,12 @@ public class JwtRealm extends AuthorizingRealm{
 			// 没有做任何的签名校验
 			 payload = Commons.parseJwtPayload(jwt);
 		} catch(MalformedJwtException e){
-			throw new AuthenticationException(MessageConfig.instance().getMsgJwtMalformed());
+			throw new AuthenticationException(messages.getMsgJwtMalformed());
 		} catch(Exception e){
-			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
+			throw new AuthenticationException(messages.getMsgJwtError());
 		}
 		if(null == payload){
-			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
+			throw new AuthenticationException(messages.getMsgJwtError());
 		}
 		return new SimpleAuthenticationInfo("jwt:"+payload,jwt,this.getName());
 	}

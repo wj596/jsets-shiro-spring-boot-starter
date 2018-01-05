@@ -12,7 +12,7 @@
 		<jjwt.version>0.9.0</jjwt.version>
 		<jcaptcha.version>1.0-all</jcaptcha.version>
 		<guava.version>20.0</guava.version>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.7</java.version>
 	</properties>
 

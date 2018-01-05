@@ -26,7 +26,6 @@ import org.apache.shiro.util.StringUtils;
 import org.apache.shiro.web.filter.authz.AuthorizationFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 /**
  * 抽象权限过滤器,扩展自AuthorizationFilter增加了针对ajax请求的处理。

@@ -185,10 +185,10 @@ public class JsetsSecurityManager {
 										final ShiroCryptoService cryptoService, final CacheDelegator cacheDelegator) {
 
 		List<Realm> useRealms = Lists.newLinkedList();
-		JsetsPasswdMatcher passwdMatcher = new JsetsPasswdMatcher(properties,cacheDelegator,cryptoService
+		JsetsPasswdMatcher passwdMatcher = new JsetsPasswdMatcher(properties,MessageConfig.ins(),cacheDelegator,cryptoService
 															  ,this.getSecurityConfig().getPasswdRetryLimitHandler());
 		
-		AccountPasswdRealm accountPasswdRealm = new AccountPasswdRealm(properties,this.getSecurityConfig().getAccountProvider());
+		AccountPasswdRealm accountPasswdRealm = new AccountPasswdRealm(MessageConfig.ins(),this.getSecurityConfig().getAccountProvider());
 		accountPasswdRealm.setCredentialsMatcher(passwdMatcher);
 		if (properties.isAuthCacheEnabled()) {
 			accountPasswdRealm.setAuthorizationCacheName(ShiroProperties.CACHE_NAME_AUTHORIZATION);
@@ -208,15 +208,15 @@ public class JsetsSecurityManager {
 				accountProvider = 
 					new DefaultShiroStatelessAccountProviderImpl(this.getSecurityConfig().getAccountProvider());
 			}
-			JsetsHmacMatcher hmacMatcher = new JsetsHmacMatcher(properties,cryptoService,accountProvider);
+			JsetsHmacMatcher hmacMatcher = new JsetsHmacMatcher(properties,MessageConfig.ins(),cryptoService,accountProvider);
 			HmacRealm hmacRealm = new HmacRealm(accountProvider);
 			hmacRealm.setCredentialsMatcher(hmacMatcher);
 			hmacRealm.setCachingEnabled(Boolean.FALSE);
 			useRealms.add(hmacRealm);
 		}
 		if (properties.isJwtEnabled()) {
-			JsetsJwtMatcher jwtMatcher = new JsetsJwtMatcher(properties,cryptoService);
-			JwtRealm jwtRealm = new JwtRealm(properties);
+			JsetsJwtMatcher jwtMatcher = new JsetsJwtMatcher(properties,MessageConfig.ins(),cryptoService);
+			JwtRealm jwtRealm = new JwtRealm(MessageConfig.ins());
 			jwtRealm.setCredentialsMatcher(jwtMatcher);
 			jwtRealm.setCachingEnabled(Boolean.FALSE);
 			useRealms.add(jwtRealm);
@@ -251,7 +251,7 @@ public class JsetsSecurityManager {
 		Map<String, Filter> filters = Maps.newLinkedHashMap();
 		filters.putAll(this.filterChainConfig.getFilters());
 
-		JsetsFormAuthenticationFilter formAuthenticationFilter = new JsetsFormAuthenticationFilter(properties);
+		JsetsFormAuthenticationFilter formAuthenticationFilter = new JsetsFormAuthenticationFilter(properties,MessageConfig.ins());
 		if(!filters.containsKey(FILTER_AUTHC))filters.put(FILTER_AUTHC, formAuthenticationFilter);
 		if (properties.isJcaptchaEnable()) {
 			JcaptchaFilter jcaptchaFilter = new JcaptchaFilter();

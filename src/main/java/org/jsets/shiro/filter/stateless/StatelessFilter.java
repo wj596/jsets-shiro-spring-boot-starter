@@ -33,7 +33,6 @@ import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.token.HmacToken;
 import org.jsets.shiro.token.JwtToken;
 import org.jsets.shiro.util.Commons;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 

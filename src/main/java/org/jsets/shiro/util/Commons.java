@@ -19,6 +19,7 @@ package org.jsets.shiro.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletRequest;
@@ -115,7 +116,7 @@ public abstract class Commons {
 	 * 设置信息
 	 */
 	public static void setAuthMessage(ServletRequest request, String message) { 
-		 request.setAttribute(ShiroProperties.ATTRIBUTE_REQUEST_AUTH_MESSAGE, message); 
+		request.setAttribute(ShiroProperties.ATTRIBUTE_REQUEST_AUTH_MESSAGE,message);
 	}
 
 	/**

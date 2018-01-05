@@ -25,41 +25,56 @@ package org.jsets.shiro.config;
  */
 public class MessageConfig {
 	
-	
 	private MessageConfig(){};
-	private static class MessageConfigHolder{
-		private static MessageConfig MESSAGECONFIG = new MessageConfig();
-	}
-	public static MessageConfig instance(){
-		  return MessageConfigHolder.MESSAGECONFIG;
-	}
 	
-	public static final String MSG_ACCOUNT_EXCEPT = "账号异常";
+	private static class MessagesHolder{
+		private static MessageConfig MESSAGES = new MessageConfig();
+	}
+	protected static MessageConfig ins(){
+		  return MessagesHolder.MESSAGES;
+	}
+
+	// 验证码为空
+	public static final String MSG_CAPTCHA_EMPTY = "验证码不能为空";
+	// 验证码错误
+	public static final String MSG_CAPTCHA_ERROR = "验证码错误";
+	// 账号密码为空
+	public static final String MSG_ACCOUNT_PASSWORD_EMPTY = "账号和密码均不能为空";
+	// 账号不存在
 	public static final String MSG_ACCOUNT_NOT_EXIST = "账号不存在";
-	public static final String MSG_AUTHC_ERROR = "账号或密码错误";
-	public static final String MSG_PASSWD_RETRY_ERROR = "密码错误{total}次账号将会锁定,您还可以重试：{remain}次";
-	public static final String MSG_HMAC_ERROR = "签名无效";
-	public static final String MSG_HMAC_TIMEOUT = "签名过期";
-	public static final String MSG_JWT_ERROR = "令牌无效";
-	public static final String MSG_JWT_TIMEOUT = "令牌过期";
-	public static final String MSG_JWT_MALFORMED = "令牌格式错误";
-	public static final String MSG_JWT_SIGNATURE = "令牌签名错误";
-	
-	// REST编码-认证成功
+	// 账号异常
+	public static final String MSG_ACCOUNT_EXCEPTION = "账号异常";
+	// 账号或密码错误
+	public static final String MSG_ACCOUNT_PASSWORD_ERROR = "账号或密码错误";
+	// 密码重试错误
+	public static final String MSG_PASSWORD_RETRY_ERROR = "密码输入错误 {total} 次账号将被锁定, 您还能再试 {remain} 次";
+	// 签名无效
+	public static final String MSG_HMAC_ERROR = "hmac签名无效";
+	// 签名过期
+	public static final String MSG_HMAC_TIMEOUT = "hmac签名超时";
+	// 令牌无效
+	public static final String MSG_JWT_ERROR = "jwt无效";
+	// 令牌过期
+	public static final String MSG_JWT_TIMEOUT = "jwt超时";
+	// 令牌格式错误
+	public static final String MSG_JWT_MALFORMED = "jwt格式错误";
+	// 令牌签名无效
+	public static final String MSG_JWT_SIGNATURE = "jwt签名无效";
+	// REST编码-身份验证成功
 	public static final String REST_CODE_AUTH_SUCCEED = "auth:succeed";
-	// REST消息-认证成功
+	// REST消息-身份验证成功
 	public static final String REST_MESSAGE_AUTH_SUCCEED = "身份验证成功";
-	// REST编码-认证失败
+	// REST编码-身份验证失败
 	public static final String REST_CODE_AUTH_LOGIN_ERROR = "auth:login_error";
-	// REST消息-认证失败
+	// REST消息-身份验证失败
 	public static final String REST_MESSAGE_AUTH_LOGIN_ERROR = "身份验证失败";
-	// REST编码-未认证
+	// REST编码-需要身份验证
 	public static final String REST_CODE_AUTH_UNAUTHORIZED = "auth:unauthorized";
-	// REST消息-未认证
+	// REST消息-需要身份验证
 	public static final String REST_MESSAGE_AUTH_UNAUTHORIZED = "需要身份验证";
-	// REST编码-未授权
+	// REST编码-权限不足
 	public static final String REST_CODE_AUTH_FORBIDDEN = "auth:forbidden";
-	// REST消息-未授权
+	// REST消息-权限不足
 	public static final String REST_MESSAGE_AUTH_FORBIDDEN = "权限不足";
 	// REST编码-无用户
 	public static final String REST_CODE_AUTH_USER_NOT_FOUND = "auth:user_not_found";
@@ -67,93 +82,133 @@ public class MessageConfig {
 	public static final String REST_CODE_AUTH_NO_PERMISSION = "auth:bad_password";
 	// REST编码-未知错误
 	public static final String REST_CODE_INTERNAL_UNKNOWN_ERROR = "internal:unknown_error";
-	
-	
-	private String msgAccountExcept = MSG_ACCOUNT_EXCEPT;// 账号异常
-	private String msgAccountNotExist = MSG_ACCOUNT_NOT_EXIST;// 账号不存在
-	private String msgAuthcError = MSG_AUTHC_ERROR;// 账号或密码错误
-	private String msgPasswdRetryError = MSG_PASSWD_RETRY_ERROR;// 密码错误,您还可以重试：{remain}次
-	private String msgHmacError = MSG_HMAC_ERROR;// 签名无效
-	private String msgHmacTimeout = MSG_HMAC_TIMEOUT;// 签名过期
-	private String msgJwtError = MSG_JWT_ERROR;// 令牌无效
-	private String msgJwtTimeout = MSG_JWT_TIMEOUT;// 令牌过期
-	private String msgJwtMalformed = MSG_JWT_MALFORMED;// 令牌格式错误
-	private String msgJwtSignature = MSG_JWT_SIGNATURE;// 令牌签名错误
+
+ 	// 验证码为空
+	private String msgCaptchaEmpty = MSG_CAPTCHA_EMPTY;
+	// 验证码错误
+	private String msgCaptchaError = MSG_CAPTCHA_ERROR;
+	// 账号密码为空
+	private String msgAccountPasswordEmpty = MSG_ACCOUNT_PASSWORD_EMPTY;
+	// 账号不存在
+	private String msgAccountNotExist = MSG_ACCOUNT_NOT_EXIST;
+	// 账号异常
+	private String msgAccountException = MSG_ACCOUNT_EXCEPTION;
+	// 账号或密码错误
+	private String msgAccountPasswordError = MSG_ACCOUNT_PASSWORD_ERROR;
+	// 密码重试错误
+	private String msgPasswordRetryError = MSG_PASSWORD_RETRY_ERROR;
+	// 签名无效
+	private String msgHmacError = MSG_HMAC_ERROR;
+	// 签名过期
+	private String msgHmacTimeout = MSG_HMAC_TIMEOUT;
+	// 令牌无效
+	private String msgJwtError = MSG_JWT_ERROR;
+	// 令牌过期
+	private String msgJwtTimeout = MSG_JWT_TIMEOUT;
+	// 令牌格式错误
+	private String msgJwtMalformed = MSG_JWT_MALFORMED;
+	// 令牌签名无效
+	private String msgJwtSignature = MSG_JWT_SIGNATURE;
 	
 	/**
-	 * 账号异常,默认：账号异常
+	 * 设置提示信息-验证码为空
 	 */
-	public void setMsgAccountExcept(String msgAccountExcept) {
-		this.msgAccountExcept = msgAccountExcept;
+	public void setMsgCaptchaEmpty(String msgCaptchaEmpty) {
+		this.msgCaptchaEmpty = msgCaptchaEmpty;
 	}
 	/**
-	 * 账号不存在,默认：账号不存在
+	 * 设置提示信息-验证码错误
+	 */
+	public void setMsgCaptchaError(String msgCaptchaError) {
+		this.msgCaptchaError = msgCaptchaError;
+	}
+	/**
+	 * 设置提示信息-账号或者密码为空
+	 */
+	public void setMsgAccountPasswordEmpty(String msgAccountPasswordEmpty) {
+		this.msgAccountPasswordEmpty = msgAccountPasswordEmpty;
+	}
+	/**
+	 * 设置提示信息-账号不存在
 	 */
 	public void setMsgAccountNotExist(String msgAccountNotExist) {
 		this.msgAccountNotExist = msgAccountNotExist;
 	}
 	/**
-	 * 认证失败,默认：账号或密码错误
+	 * 设置提示信息-账号异常
 	 */
-	public void setMsgAuthcError(String msgAuthcError) {
-		this.msgAuthcError = msgAuthcError;
+	public void setMsgAccountException(String msgAccountException) {
+		this.msgAccountException = msgAccountException;
 	}
 	/**
-	 * 设置密码重试错误提示,提供两个站位符：最大次数{total}、剩余次数：{remain}
+	 * 设置提示信息-账号或密码错误
+	 */
+	public void setMsgAccountPasswordError(String msgAccountPasswordError) {
+		this.msgAccountPasswordError = msgAccountPasswordError;
+	}
+	/**
+	 * 设置提示信息-密码重试错误，提供两个站位符：最大次数{total}、剩余次数：{remain}
 	 * <br>默认：密码错误{total}次账号将被锁定,您还可以重试：{remain}次
 	 */
-	public void setMsgPasswdRetryError(String msgPasswdRetryError) {
-		this.msgPasswdRetryError = msgPasswdRetryError;
+	public void setMsgPasswordRetryError(String msgPasswordRetryError) {
+		this.msgPasswordRetryError = msgPasswordRetryError;
 	}
 	/**
-	 * hmac验证失败,默认：签名无效
+	 * 设置提示信息-hmac签名无效
 	 */
 	public void setMsgHmacError(String msgHmacError) {
 		this.msgHmacError = msgHmacError;
 	}
 	/**
-	 * hmac签名过期,默认：签名过期
+	 * 设置提示信息-hmac签名超时
 	 */
 	public void setMsgHmacTimeout(String msgHmacTimeout) {
 		this.msgHmacTimeout = msgHmacTimeout;
 	}
 	/**
-	 * jwt验证失败,默认：令牌无效
+	 * 设置提示信息-jwt无效
 	 */
 	public void setMsgJwtError(String msgJwtError) {
 		this.msgJwtError = msgJwtError;
 	}
 	/**
-	 * jwt令牌过期,默认：令牌过期
+	 * 设置提示信息-jwt超时
 	 */
 	public void setMsgJwtTimeout(String msgJwtTimeout) {
 		this.msgJwtTimeout = msgJwtTimeout;
 	}
 	/**
-	 * jwt令牌格式错误,默认：令牌格式错误
+	 * 设置提示信息-jwt格式错误
 	 */
 	public void setMsgJwtMalformed(String msgJwtMalformed) {
 		this.msgJwtMalformed = msgJwtMalformed;
 	}
 	/**
-	 * jwt令牌签名错误,默认：令牌签名错误
+	 * 设置提示信息-jwt签名错误
 	 */
 	public void setMsgJwtSignature(String msgJwtSignature) {
 		this.msgJwtSignature = msgJwtSignature;
 	}
-	
-	
-	public String getMsgAccountExcept() {
-		return msgAccountExcept;
+	public String getMsgCaptchaEmpty() {
+		return msgCaptchaEmpty;
+	}
+	public String getMsgCaptchaError() {
+		return msgCaptchaError;
+	}
+	public String getMsgAccountPasswordEmpty() {
+		return msgAccountPasswordEmpty;
 	}
 	public String getMsgAccountNotExist() {
 		return msgAccountNotExist;
 	}
-	public String getMsgAuthcError() {
-		return msgAuthcError;
+	public String getMsgAccountException() {
+		return msgAccountException;
 	}
-	public String getMsgPasswdRetryError() {
-		return msgPasswdRetryError;
+	public String getMsgAccountPasswordError() {
+		return msgAccountPasswordError;
+	}
+	public String getMsgPasswordRetryError() {
+		return msgPasswordRetryError;
 	}
 	public String getMsgHmacError() {
 		return msgHmacError;

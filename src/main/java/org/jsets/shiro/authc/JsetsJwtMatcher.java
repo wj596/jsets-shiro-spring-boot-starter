@@ -37,10 +37,12 @@ import io.jsonwebtoken.SignatureException;
 public class JsetsJwtMatcher implements CredentialsMatcher {
 	
 	private final ShiroProperties shiroProperties;
+	private final MessageConfig messages;
 	private final ShiroCryptoService cryptoService;
 
-	public JsetsJwtMatcher(ShiroProperties shiroProperties,ShiroCryptoService cryptoService){
+	public JsetsJwtMatcher(ShiroProperties shiroProperties,MessageConfig messages,ShiroCryptoService cryptoService){
 		this.shiroProperties = shiroProperties;
+		this.messages = messages;
 		this.cryptoService = cryptoService;
 	}
 	
@@ -53,12 +55,12 @@ public class JsetsJwtMatcher implements CredentialsMatcher {
 		} catch(SignatureException e){
 			throw new AuthenticationException(shiroProperties.getJwtSecretKey());
 		} catch(ExpiredJwtException e){
-			throw new AuthenticationException(MessageConfig.instance().getMsgJwtTimeout());
+			throw new AuthenticationException(messages.getMsgJwtTimeout());
 		} catch(Exception e){
-			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
+			throw new AuthenticationException(messages.getMsgJwtError());
 		}
 		if(null == statelessAccount){
-			throw new AuthenticationException(MessageConfig.instance().getMsgJwtError());
+			throw new AuthenticationException(messages.getMsgJwtError());
 		}
 		// 可以做签发方验证
 		// 可以做接收方验证

@@ -45,6 +45,7 @@ public class SecurityManagerConfig {
 	private CacheManager cacheManager;
 	private final List<SessionListener> sessionListeners = Lists.newLinkedList();
 	private final List<Realm> realms = Lists.newLinkedList();
+	private final MessageConfig messages = MessageConfig.ins();
 	
 
 	/**
@@ -136,5 +137,11 @@ public class SecurityManagerConfig {
 	}
 	protected List<Realm> getRealms() {
 		return this.realms;
+	}
+	/**
+	 * 获取提示消息配置，以便根据需要修改提示消息
+	 */
+	public MessageConfig getMessages() {
+		return messages;
 	}
 }

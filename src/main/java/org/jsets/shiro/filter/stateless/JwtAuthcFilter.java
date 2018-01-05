@@ -25,7 +25,6 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.util.Commons;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -31,7 +31,6 @@ import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.Account;
 import org.jsets.shiro.service.ShiroAccountProvider;
-
 /**
  * 基于用户、名密码的控制域
  * 
@@ -40,11 +39,11 @@ import org.jsets.shiro.service.ShiroAccountProvider;
  */
 public class AccountPasswdRealm extends AuthorizingRealm {
 	
-	private final ShiroProperties shiroProperties;
+	private final MessageConfig messages;
 	private final ShiroAccountProvider accountProvider;
 	
-	public AccountPasswdRealm(ShiroProperties shiroProperties,ShiroAccountProvider accountProvider){
-		this.shiroProperties = shiroProperties;
+	public AccountPasswdRealm(MessageConfig messages,ShiroAccountProvider accountProvider){
+		this.messages = messages;
 		this.accountProvider = accountProvider;
 	}
 
@@ -58,12 +57,12 @@ public class AccountPasswdRealm extends AuthorizingRealm {
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 		if(null==token.getPrincipal()||null==token.getCredentials()){
-			throw new AuthenticationException("账号和密码均不能为空");
+			throw new AuthenticationException(messages.getMsgAccountPasswordEmpty());
 		}
 		String account = (String) token.getPrincipal();
 		Account accountEntity = this.accountProvider.loadAccount(account);
 		if (null == accountEntity) {
-			throw new AuthenticationException(MessageConfig.instance().getMsgAccountNotExist());
+			throw new AuthenticationException(messages.getMsgAccountNotExist());
 		}
 		return new SimpleAuthenticationInfo(account,accountEntity.getPassword(), getName());
 	}
