@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jsets</groupId>
 	<artifactId>jsets-shiro-spring-boot-starter</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 
 	<properties>
 		<spring-boot.version>1.5.3.RELEASE</spring-boot.version>
@@ -13,7 +13,7 @@
 		<jcaptcha.version>1.0-all</jcaptcha.version>
 		<guava.version>20.0</guava.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>1.7</java.version>
+		<java.version>1.8</java.version>
 	</properties>
 
 	<dependencies>

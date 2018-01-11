@@ -22,6 +22,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.jsets.shiro.cache.CacheDelegator;
+import org.jsets.shiro.config.JsetsShiroManager;
 import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.handler.PasswdRetryLimitHandler;
@@ -35,21 +36,11 @@ import org.jsets.shiro.service.ShiroCryptoService;
  */
 public class JsetsPasswdMatcher implements CredentialsMatcher {
 
-	private final ShiroProperties shiroProperties;
-	private final MessageConfig messages;
-	private final CacheDelegator cacheDelegator;
-	private final ShiroCryptoService cryptoService;
-	private final PasswdRetryLimitHandler retryLimitHandler;
-	
-	
-	public JsetsPasswdMatcher(ShiroProperties shiroProperties,MessageConfig messages,CacheDelegator cacheDelegator
-				,ShiroCryptoService cryptoService,PasswdRetryLimitHandler retryLimitHandler){
-		this.shiroProperties = shiroProperties;
-		this.messages = messages;
-		this.cacheDelegator = cacheDelegator;
-		this.cryptoService = cryptoService;
-		this.retryLimitHandler = retryLimitHandler;
-	}
+	private  ShiroProperties properties;
+	private  MessageConfig messages;
+	private  PasswdRetryLimitHandler passwdRetryLimitHandler;
+	private  CacheDelegator cacheDelegator;
+	private  ShiroCryptoService cryptoService;
 	
 	@Override
 	public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
@@ -58,13 +49,13 @@ public class JsetsPasswdMatcher implements CredentialsMatcher {
 		String password = (String) info.getCredentials();
 		String encrypted  = this.cryptoService.password(credentials);
 		if (!password.equals(encrypted)) {
-			int passwdMaxRetries = this.shiroProperties.getPasswdMaxRetries();
-			String errorMsg = messages.getMsgAccountPasswordError();
-			if (passwdMaxRetries > 0 && null != this.retryLimitHandler) {
-				errorMsg = messages.getMsgPasswordRetryError();
+			int passwdMaxRetries = this.properties.getPasswdMaxRetries();
+			String errorMsg = this.messages.getMsgAccountPasswordError();
+			if (passwdMaxRetries > 0 && null != this.passwdRetryLimitHandler) {
+				errorMsg = this.messages.getMsgPasswordRetryError();
 				int passwdRetries = this.cacheDelegator.incPasswdRetryCount(account);
 				if (passwdRetries >= passwdMaxRetries-1) {
-					this.retryLimitHandler.handle(account);
+					this.passwdRetryLimitHandler.handle(account);
 				}
 				int remain = passwdMaxRetries - passwdRetries;
 				errorMsg = errorMsg.replace("{total}", String.valueOf(passwdMaxRetries))
@@ -76,4 +67,20 @@ public class JsetsPasswdMatcher implements CredentialsMatcher {
 		return true;
 	}
 
+	public void setProperties(ShiroProperties properties) {
+		this.properties = properties;
+	}
+	public void setCacheDelegator(CacheDelegator cacheDelegator) {
+		this.cacheDelegator = cacheDelegator;
+	}
+	public void setCryptoService(ShiroCryptoService cryptoService) {
+		this.cryptoService = cryptoService;
+	}
+	public void setMessages(MessageConfig messages) {
+		this.messages = messages;
+	}
+	public void setPasswdRetryLimitHandler(PasswdRetryLimitHandler passwdRetryLimitHandler) {
+		this.passwdRetryLimitHandler = passwdRetryLimitHandler;
+	}
+	
 }

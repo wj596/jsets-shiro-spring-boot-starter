@@ -26,7 +26,7 @@ import org.jsets.shiro.model.Account;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public abstract class StatelessLocal {
+public abstract class StatelessLocals {
 
     private static final ThreadLocal<Account> ACCOUNTS = new ThreadLocal<Account>();
 

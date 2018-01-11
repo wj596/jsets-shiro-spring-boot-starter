@@ -19,7 +19,6 @@ package org.jsets.shiro.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletRequest;
@@ -44,7 +43,6 @@ import io.jsonwebtoken.impl.TextCodec;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.lang.Assert;
 
-
 /**
  * 辅助工具类
  * 
@@ -55,6 +53,30 @@ import io.jsonwebtoken.lang.Assert;
 public abstract class Commons {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Commons.class);
+	
+	public static final String JCAPTCHA_URL = "/jcaptcha.jpg";
+	public static final String FILTER_ANON = "anon";
+	public static final String FILTER_AUTHC = "authc";
+	public static final String FILTER_JCAPTCHA = "jcaptcha";
+	public static final String FILTER_ROLES = "roles";
+	public static final String FILTER_PERMS = "perms";
+	public static final String FILTER_USER = "user";
+	public static final String FILTER_KEEP_ONE = "keepOne";
+	public static final String FILTER_FORCE_LOGOUT = "forceLogout";
+	public static final String FILTER_HMAC = "hmac";
+	public static final String FILTER_HMAC_ROLES = "hmacRoles";
+	public static final String FILTER_HMAC_PERMS = "hmacPerms";
+	public static final String FILTER_JWT = "jwt";
+	public static final String FILTER_JWT_ROLES = "jwtRoles";
+	public static final String FILTER_JWT_PERMS = "jwtPerms";
+	
+	public static final short CACHE_TYPE_MAP = 0;
+	public static final short CACHE_TYPE_EHCACHE = 1;
+	public static final short CACHE_TYPE_REDIS = 2;
+	public static final short CACHE_TYPE_OTHER = 3;
+	
+	public static final String REMEMBERME_COOKIE_NAME = "rememberMeCookie";
+	
 
 	private static final ObjectMapper MAPPER = new ObjectMapper(); 
 	private static CompressionCodecResolver CODECRESOLVER = new DefaultCompressionCodecResolver();
@@ -130,6 +152,7 @@ public abstract class Commons {
 	 * 分割字符串进SET
 	 */
 	public static Set<String> split(String str, String separator) {
+		
 		Set<String> set = Sets.newLinkedHashSet();
 		if (Strings.isNullOrEmpty(str))
 			return set;
@@ -181,6 +204,13 @@ public abstract class Commons {
 			e.printStackTrace();
 		} 
 		return null;
+	}
+	
+	/**
+	 * JSON转对象
+	 */
+	public static boolean hasLen(String string){
+		return !Strings.isNullOrEmpty(string);
 	}
 	
 	/**

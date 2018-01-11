@@ -17,16 +17,16 @@
  */
 package org.jsets.shiro.model;
 
-import java.io.Serializable;
-
+import org.jsets.shiro.util.Commons;
+import com.google.common.base.Strings;
 /**
- * 基于角色/权限的过滤规则
+ * 基于角色/权限的权限验证规则
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  *
  */
-public class RolePermRule implements Serializable{
+public class RolePermRule extends AuthorizeRule  {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -34,21 +34,6 @@ public class RolePermRule implements Serializable{
 	private String needRoles;// 访问需要的角色列表(多个角色用逗号分开)
 	private String needPerms;// 访问需要的权限列表(多个权限用逗号分开)
 
-	/**
-	 * @param url 访问地址
-	 */
-	public RolePermRule(String url){
-		this.url = url;
-	}
-	
-	/**
-	 * @param url 访问地址
-	 * @param needRoles 访问需要的角色列表
-	 */
-	public RolePermRule(String url,String needRoles){
-		this.url = url;
-		this.needRoles = needRoles;
-	}
 	
 	public String getUrl() {
 		return url;
@@ -68,4 +53,52 @@ public class RolePermRule implements Serializable{
 	public void setNeedPerms(String needPerms) {
 		this.needPerms = needPerms;
 	}
+	
+	@Override
+	public StringBuilder toFilterChain() {
+		
+		if(Strings.isNullOrEmpty(this.getUrl())) return null;
+		
+		StringBuilder sb = new StringBuilder();
+		if(AuthorizeRule.RULE_TYPE_DEF == this.getType()){
+        	if(!Strings.isNullOrEmpty(this.getNeedRoles())){
+        		sb.append(Commons.FILTER_ROLES+"["+this.getNeedRoles()+"]");
+        	}
+        	if(!Strings.isNullOrEmpty(this.getNeedPerms())){
+        		if(sb.length()>0) sb.append(",");
+        		sb.append(Commons.FILTER_PERMS+"["+this.getNeedPerms()+"]");
+        	}
+		}
+		if(AuthorizeRule.RULE_TYPE_HMAC == this.getType()){
+           	if(!Strings.isNullOrEmpty(this.getNeedRoles())){
+        		sb.append(Commons.FILTER_HMAC_ROLES+"["+this.getNeedRoles()+"]");
+        	}
+        	if(!Strings.isNullOrEmpty(this.getNeedPerms())){
+        		if(sb.length()>0) sb.append(",");
+        		sb.append(Commons.FILTER_HMAC_PERMS+"["+this.getNeedPerms()+"]");
+        	}
+        	if(sb.length()==0) {
+        		sb.append(Commons.FILTER_HMAC);
+        	}
+		}
+		if(AuthorizeRule.RULE_TYPE_JWT == this.getType()){
+           	if(!Strings.isNullOrEmpty(this.getNeedRoles())){
+        		sb.append(Commons.FILTER_JWT_ROLES+"["+this.getNeedRoles()+"]");
+        	}
+        	if(!Strings.isNullOrEmpty(this.getNeedPerms())){
+        		if(sb.length()>0) sb.append(",");
+        		sb.append(Commons.FILTER_JWT_ROLES+"["+this.getNeedPerms()+"]");
+        	}
+        	if(sb.length()==0) {
+        		sb.append(Commons.FILTER_JWT);
+        	}
+		}
+		return sb.length()>0?sb:null;
+	}
+	
+	@Override
+	public String toString() {
+		return "RolePermRule [url=" + url + ", needRoles=" + needRoles + ", needPerms=" + needPerms + "]";
+	}
+
 }

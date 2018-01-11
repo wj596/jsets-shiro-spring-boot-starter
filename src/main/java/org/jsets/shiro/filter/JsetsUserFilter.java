@@ -36,11 +36,7 @@ import org.jsets.shiro.service.ShiroAccountProvider;
  */
 public class JsetsUserFilter extends JsetsAccessControlFilter {
 
-	private final ShiroAccountProvider accountService;
-
-	public JsetsUserFilter(ShiroAccountProvider accountService){
-		this.accountService = accountService;
-	}
+	private ShiroAccountProvider accountService;
 
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws IOException{
 		
@@ -69,5 +65,9 @@ public class JsetsUserFilter extends JsetsAccessControlFilter {
 
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
 		return this.respondLogin(request, response);
+	}
+
+	public void setAccountService(ShiroAccountProvider accountService) {
+		this.accountService = accountService;
 	}
 }

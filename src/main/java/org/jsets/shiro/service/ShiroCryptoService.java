@@ -20,7 +20,7 @@ package org.jsets.shiro.service;
 import javax.xml.bind.DatatypeConverter;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.jsets.shiro.config.ShiroProperties;
-import org.jsets.shiro.model.StatelessAccount;
+import org.jsets.shiro.model.StatelessLogined;
 import org.jsets.shiro.util.CryptoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Strings;
@@ -57,11 +57,17 @@ public class ShiroCryptoService {
 	 * 
 	 * @param plaintext 明文
 	 */
+	public String hmacDigest(String plaintext) {
+		return hmacDigest(plaintext,this.shiroProperties.getHmacSecretKey());
+	}
+	
+	/**
+	 * 生成HMAC摘要
+	 * 
+	 * @param plaintext 明文
+	 */
 	public String hmacDigest(String plaintext,String appKey) {
-		if(Strings.isNullOrEmpty(appKey))
-			appKey = this.shiroProperties.getHmacSecretKey();
-		return CryptoUtil.hmacDigest(plaintext,appKey
-						 ,this.shiroProperties.getHmacAlg());
+		return CryptoUtil.hmacDigest(plaintext,appKey,this.shiroProperties.getHmacAlg());
 	}
 	
 	/**
@@ -69,12 +75,21 @@ public class ShiroCryptoService {
 	 * 
 	 * @param jwt json web token
 	 */
-	public StatelessAccount parseJwt(String jwt) {
+	public StatelessLogined parseJwt(String jwt) {
+		return parseJwt(jwt,this.shiroProperties.getJwtSecretKey());
+	}
+	
+	/**
+	 * 验签JWT
+	 * 
+	 * @param jwt json web token
+	 */
+	public StatelessLogined parseJwt(String jwt,String appKey) {
 		Claims claims = Jwts.parser()
-				.setSigningKey(DatatypeConverter.parseBase64Binary(this.shiroProperties.getJwtSecretKey()))
+				.setSigningKey(DatatypeConverter.parseBase64Binary(appKey))
 				.parseClaimsJws(jwt)
 				.getBody();
-		StatelessAccount statelessAccount = new StatelessAccount();
+		StatelessLogined statelessAccount = new StatelessLogined();
 		statelessAccount.setTokenId(claims.getId());// 令牌ID
 		statelessAccount.setAppId(claims.getSubject());// 客户标识
 		statelessAccount.setIssuer(claims.getIssuer());// 签发者

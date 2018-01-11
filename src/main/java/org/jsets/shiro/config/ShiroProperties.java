@@ -31,9 +31,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "jsets.shiro")
 public class ShiroProperties {
 
-	public static final String DEFAULT_JCAPTCHA_URL = "/jcaptcha.jpg";
+	
 	// 默认SESSION超时时间：1小时=3600000毫秒(ms)
 	protected static final Integer DEFAULT_SESSION_TIMEOUT = 3600000;
+	// 默认SESSION清扫时间：1小时=3600000毫秒(ms)
+	protected static final Integer DEFAULT_SESSION_VALIDATION_INTERVAL = 3600000;
 	// 记住我默认时间：1天=86400000毫秒(ms)
 	protected static final Integer DEFAULT_REMEMBERME_MAX_AGE = 86400000 * 7;
 	// 默认HMAC签名有效期：1分钟=60000毫秒(ms)
@@ -63,6 +65,8 @@ public class ShiroProperties {
 	public static final String CACHE_NAME_KEEP_ONE_USER = "shiro-keepOneUserCache";
 	public static final String CACHE_NAME_AUTHENTICATION = "shiro-authenticationCache";
 	public static final String CACHE_NAME_AUTHORIZATION = "shiro-authorizationCache";
+	public static final String CACHE_NAME_TOKEN_BURNERS = "shiro-tokenBurnersCache";
+	
 	// ATTRIBUTE名称
 	public static final String ATTRIBUTE_SESSION_CURRENT_USER = "shiro_current_user";
 	public static final String ATTRIBUTE_SESSION_CURRENT_USER_ACCOUNT = "shiro_current_user_account";
@@ -93,7 +97,9 @@ public class ShiroProperties {
 	private boolean redisEnabled = Boolean.FALSE; // 是否启用redis缓存
 	private boolean authCacheEnabled = Boolean.FALSE;// 是否启用认证授权缓存
 	private boolean hmacEnabled = Boolean.FALSE; // 是否启用HMAC鉴权
+	private boolean hmacBurnEnabled = Boolean.FALSE; // 是否启用HMAC签名即时失效
 	private boolean jwtEnabled = Boolean.FALSE; // 是否启用JWT鉴权
+	private boolean jwtBurnEnabled = Boolean.FALSE; // 是否启用JWT令牌即时失效
 	
 	private String loginUrl;// 登陆地址
 	private String loginSuccessUrl;// 登陆成功地址
@@ -103,6 +109,8 @@ public class ShiroProperties {
 
 	private Integer passwdMaxRetries = 0;// 登陆最大重试次数
 	private Integer sessionTimeout = DEFAULT_SESSION_TIMEOUT;// session超时时间
+	private Integer sessionValidationInterval = DEFAULT_SESSION_VALIDATION_INTERVAL;// session清扫时间
+	
 	private Integer remembermeMaxAge = DEFAULT_REMEMBERME_MAX_AGE;// rememberMe时间
 	private String remembermeSecretKey = DEFAULT_REMEMBERME_SECRETKEY;// rememberMe秘钥
 	private String passwdAlg = DEFAULT_HASH_ALGORITHM_NAME;// 密码算法
@@ -274,5 +282,23 @@ public class ShiroProperties {
 	}
 	public void setHmacPeriod(Integer hmacPeriod) {
 		this.hmacPeriod = hmacPeriod;
+	}
+	public Integer getSessionValidationInterval() {
+		return sessionValidationInterval;
+	}
+	public void setSessionValidationInterval(Integer sessionValidationInterval) {
+		this.sessionValidationInterval = sessionValidationInterval;
+	}
+	public boolean isHmacBurnEnabled() {
+		return hmacBurnEnabled;
+	}
+	public void setHmacBurnEnabled(boolean hmacBurnEnabled) {
+		this.hmacBurnEnabled = hmacBurnEnabled;
+	}
+	public boolean isJwtBurnEnabled() {
+		return jwtBurnEnabled;
+	}
+	public void setJwtBurnEnabled(boolean jwtBurnEnabled) {
+		this.jwtBurnEnabled = jwtBurnEnabled;
 	}
 }

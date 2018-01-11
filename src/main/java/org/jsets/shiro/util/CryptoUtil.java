@@ -18,19 +18,15 @@
 package org.jsets.shiro.util;
 
 import java.util.Date;
-
+import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
-
-import com.google.common.base.Strings;
-
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
 /**
  * 安全加密相关工具类
  * 
@@ -57,7 +53,7 @@ public abstract class CryptoUtil {
 	 * @param algorithm 加密算法(SignatureAlgorithm是enum)
 	 * @return json web token 
 	 */
-	public static String issueJwt(String jwtSecretKey,String id
+	public static String issueJwt(String jwtSecretKey
 								  ,String subject,String issuer,Long period,String roles
 								  ,String permissions,SignatureAlgorithm algorithm) {
 
@@ -66,11 +62,11 @@ public abstract class CryptoUtil {
 		// 秘钥
 		byte[] secretKeyBytes = DatatypeConverter.parseBase64Binary(jwtSecretKey);
 		JwtBuilder jwt  =  Jwts.builder();
-		if(!Strings.isNullOrEmpty(id)) jwt.setId(id);
+		jwt.setId(UUID.randomUUID().toString());
 		// 用户名
 		jwt.setSubject(subject);
 		// 签发者
-		if(!Strings.isNullOrEmpty(issuer)) jwt.setIssuer(issuer);
+		if(null!=issuer&&!"".equals(issuer)) jwt.setIssuer(issuer);
 		// 签发时间
 		jwt.setIssuedAt(new Date(currentTimeMillis));
 		// 有效时间
@@ -79,9 +75,9 @@ public abstract class CryptoUtil {
 			jwt.setExpiration(expiration);
 		}
 		// 访问主张-角色
-		if(!Strings.isNullOrEmpty(roles)) jwt.claim("roles", roles);
+		if(null!=roles&&!"".equals(roles)) jwt.claim("roles", roles);
 		// 访问主张-权限
-		if(!Strings.isNullOrEmpty(permissions)) jwt.claim("perms", permissions);
+		if(null!=permissions&&!"".equals(permissions)) jwt.claim("perms", permissions);
 		jwt.compressWith(CompressionCodecs.DEFLATE);
 		jwt.signWith(algorithm, secretKeyBytes);
 		return jwt.compact();

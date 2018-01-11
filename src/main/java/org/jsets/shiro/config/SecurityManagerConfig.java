@@ -18,7 +18,6 @@
 package org.jsets.shiro.config;
 
 import java.util.List;
-
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.SessionListener;
@@ -27,10 +26,9 @@ import org.apache.shiro.web.servlet.SimpleCookie;
 import org.jsets.shiro.handler.PasswdRetryLimitHandler;
 import org.jsets.shiro.service.ShiroAccountProvider;
 import org.jsets.shiro.service.ShiroStatelessAccountProvider;
-
 import com.google.common.collect.Lists;
 /**
- * 应用端配置
+ * shiro 组件配置
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
@@ -46,8 +44,9 @@ public class SecurityManagerConfig {
 	private final List<SessionListener> sessionListeners = Lists.newLinkedList();
 	private final List<Realm> realms = Lists.newLinkedList();
 	private final MessageConfig messages = MessageConfig.ins();
-	
 
+	protected SecurityManagerConfig(){};
+	
 	/**
 	 * 设置账号信息提供者
 	 * @param accountProviderImpl  see org.jsets.shiro.service.ShiroAccountProvider
@@ -101,7 +100,7 @@ public class SecurityManagerConfig {
 	/**
 	 * 添加鉴权控制域
 	 * <br>组件中提供三个控制域
-	 * <br>AccountPasswdRealm:有状态用户名,密码鉴权控制域
+	 * <br>PasswdRealm:有状态用户名,密码鉴权控制域
 	 * <br>HmacRealm:无状态hmac签名鉴权控制域
 	 * <br>JwtRealm:无状态jwt令牌鉴权控制域
 	 * <br>如果无法满足需求，可设置此项添加鉴权控制域
@@ -109,6 +108,12 @@ public class SecurityManagerConfig {
 	 */
 	public void addRealm(Realm realm) {
 		this.realms.add(realm);
+	}
+	/**
+	 * 获取提示消息配置，以便根据需要修改提示消息
+	 */
+	public MessageConfig getMessages() {
+		return messages;
 	}
 	
 	protected ShiroAccountProvider getAccountProvider() {
@@ -137,11 +142,5 @@ public class SecurityManagerConfig {
 	}
 	protected List<Realm> getRealms() {
 		return this.realms;
-	}
-	/**
-	 * 获取提示消息配置，以便根据需要修改提示消息
-	 */
-	public MessageConfig getMessages() {
-		return messages;
 	}
 }

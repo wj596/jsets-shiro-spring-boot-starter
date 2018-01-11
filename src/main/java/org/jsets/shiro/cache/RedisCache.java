@@ -54,7 +54,6 @@ public class RedisCache<K,V> implements Cache<K,V>{
 		return this.redisTemplate.keys(cacheName);
 	}
 
-	@Override
 	public V put(K key, V value) throws CacheException {
 		this.redisTemplate.put(cacheName, key, value);
 		return this.redisTemplate.get(cacheName, key);

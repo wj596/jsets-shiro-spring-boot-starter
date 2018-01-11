@@ -19,6 +19,7 @@ package org.jsets.shiro.service;
 
 import java.util.Set;
 import org.apache.shiro.authc.AuthenticationException;
+import org.jsets.shiro.model.Account;
 
 /**
  * 默认无状态账号提供者实现
@@ -27,16 +28,14 @@ import org.apache.shiro.authc.AuthenticationException;
  * @date 2016年6月31日
  *
  */
-public class DefaultShiroStatelessAccountProviderImpl implements ShiroStatelessAccountProvider{
+public class DefaultStatelessAccountProvider implements ShiroStatelessAccountProvider{
 	
-	private final ShiroAccountProvider shiroSecurityService;
-	
-	public DefaultShiroStatelessAccountProviderImpl(ShiroAccountProvider shiroSecurityService){
-		this.shiroSecurityService = shiroSecurityService;
-	}
+	private ShiroAccountProvider shiroAccountProvider;
 	
 	@Override
 	public boolean checkAccount(String appId) throws AuthenticationException {
+		Account account = shiroAccountProvider.loadAccount(appId);
+		if(null == account) return false;
 		return true;
 	}
 	
@@ -47,11 +46,15 @@ public class DefaultShiroStatelessAccountProviderImpl implements ShiroStatelessA
 
 	@Override
 	public Set<String> loadRoles(String appId) {
-		return this.shiroSecurityService.loadRoles(appId);
+		return this.shiroAccountProvider.loadRoles(appId);
 	}
 
 	@Override
 	public Set<String> loadPermissions(String appId) {
-		return this.shiroSecurityService.loadPermissions(appId);
+		return this.shiroAccountProvider.loadPermissions(appId);
+	}
+
+	public void setShiroAccountProvider(ShiroAccountProvider shiroAccountProvider) {
+		this.shiroAccountProvider = shiroAccountProvider;
 	}
 }

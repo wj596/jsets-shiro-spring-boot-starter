@@ -26,6 +26,8 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.jsets.shiro.cache.CacheDelegator;
+import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.service.ShiroStatelessAccountProvider;
 import org.jsets.shiro.token.HmacToken;
 
@@ -37,12 +39,9 @@ import org.jsets.shiro.token.HmacToken;
  */
 public class HmacRealm extends AuthorizingRealm{
 	
-	private final ShiroStatelessAccountProvider accountProvider;
-
-	public HmacRealm(ShiroStatelessAccountProvider accountProvider){
-		this.accountProvider = accountProvider;
-	}
+	private  ShiroStatelessAccountProvider accountProvider;
 	
+
 	public Class<?> getAuthenticationTokenClass() {
 		return HmacToken.class;
 	}
@@ -57,7 +56,7 @@ public class HmacRealm extends AuthorizingRealm{
 		HmacToken hmacToken = (HmacToken)token;
 		String appId = hmacToken.getAppId();
 		String digest = hmacToken.getDigest();
-        return new SimpleAuthenticationInfo(appId,digest,this.getName());
+        return new SimpleAuthenticationInfo("hmac:{"+appId+"}",digest,this.getName());
 	}
 	
 	/** 
@@ -65,14 +64,23 @@ public class HmacRealm extends AuthorizingRealm{
      */  
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-		String appId = (String) principals.getPrimaryPrincipal();
-		SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
-		Set<String> roles = this.accountProvider.loadRoles(appId);
-		Set<String> permissions = this.accountProvider.loadPermissions(appId);
-		if(null!=roles&&!roles.isEmpty())
-			info.setRoles(roles);
-		if(null!=permissions&&!permissions.isEmpty())
-			info.setStringPermissions(permissions);
-        return info;  
+		String payload = (String) principals.getPrimaryPrincipal();
+		if (payload.startsWith("hmac:") && payload.charAt(5) == '{' 
+									    && payload.charAt(payload.length() - 1) == '}') { 
+			String appId = payload.substring(6,payload.length() - 1);
+			SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
+			Set<String> roles = this.accountProvider.loadRoles(appId);
+			Set<String> permissions = this.accountProvider.loadPermissions(appId);
+			if(null!=roles&&!roles.isEmpty())
+				info.setRoles(roles);
+			if(null!=permissions&&!permissions.isEmpty())
+				info.setStringPermissions(permissions);
+	        return info;
+		}
+		return null;
+	}
+
+	public void setAccountProvider(ShiroStatelessAccountProvider accountProvider) {
+		this.accountProvider = accountProvider;
 	}
 }

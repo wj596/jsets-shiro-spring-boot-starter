@@ -30,13 +30,9 @@ import com.google.common.collect.Sets;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public class DefaultShiroAccountProviderImpl implements ShiroAccountProvider {
+public class DefaultAccountProvider implements ShiroAccountProvider {
 
-	private final ShiroCryptoService shiroCryptoService;
-	
-	public DefaultShiroAccountProviderImpl(ShiroCryptoService shiroCryptoService){
-		this.shiroCryptoService = shiroCryptoService;
-	}
+	private ShiroCryptoService shiroCryptoService;
 	
 	public static final String DEFAULT_ACCOUNT = "test";
 	public static final String DEFAULT_ROLES = "testRole";
@@ -57,4 +53,9 @@ public class DefaultShiroAccountProviderImpl implements ShiroAccountProvider {
 	public Set<String> loadPermissions(String account) {
 		return Sets.newHashSet(Arrays.asList(DEFAULT_PERMS));
 	}
+
+	public void setShiroCryptoService(ShiroCryptoService shiroCryptoService) {
+		this.shiroCryptoService = shiroCryptoService;
+	}
+	
 }

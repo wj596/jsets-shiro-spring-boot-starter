@@ -41,21 +41,13 @@ public class KeepOneUserFilter extends JsetsAccessControlFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(KeepOneUserFilter.class);
 	
-	private final ShiroProperties shiroProperties;
-	private final SessionManager sessionManager;
-	private final CacheDelegator cacheDelegate;
+	private  ShiroProperties properties;
+	private  SessionManager sessionManager;
+	private  CacheDelegator cacheDelegate;
 
-	public KeepOneUserFilter(ShiroProperties shiroProperties,SessionManager sessionManager
-																	,CacheDelegator cacheDelegate) {
-		this.shiroProperties = shiroProperties;
-		this.sessionManager = sessionManager;
-		this.cacheDelegate = cacheDelegate;
-	}
-	
-	
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
-		if(!this.shiroProperties.isKeepOneEnabled()) return true;
+		if(!this.properties.isKeepOneEnabled()) return true;
 		return false;
 	}
 
@@ -87,10 +79,19 @@ public class KeepOneUserFilter extends JsetsAccessControlFilter {
 		}
         if (null!=currentSession.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_KICKOUT)) {
         	subject.logout();
-			return this.respondRedirect(request, response,this.shiroProperties.getKickoutUrl());
+			return this.respondRedirect(request, response,this.properties.getKickoutUrl());
         }
 
 		return true;
 	}
 
+	public void setProperties(ShiroProperties properties) {
+		this.properties = properties;
+	}
+	public void setSessionManager(SessionManager sessionManager) {
+		this.sessionManager = sessionManager;
+	}
+	public void setCacheDelegate(CacheDelegator cacheDelegate) {
+		this.cacheDelegate = cacheDelegate;
+	}
 }

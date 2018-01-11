@@ -19,6 +19,8 @@ package org.jsets.shiro.cache;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
@@ -44,6 +46,10 @@ public class RedisCacheManager implements CacheManager{
             CACHES.put(cacheName, cache);  
         }  
         return cache;  
+	}
+	
+	public void setRedisTimeout(String cacheName,long timeout) {
+		this.redisTemplate.expire(cacheName, timeout, TimeUnit.SECONDS);
 	}
 
 	public void setRedisTemplate(RedisTemplate<Object, Object> redisTemplate) {

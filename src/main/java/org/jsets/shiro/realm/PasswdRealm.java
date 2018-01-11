@@ -28,7 +28,6 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.Account;
 import org.jsets.shiro.service.ShiroAccountProvider;
 /**
@@ -37,16 +36,11 @@ import org.jsets.shiro.service.ShiroAccountProvider;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-public class AccountPasswdRealm extends AuthorizingRealm {
+public class PasswdRealm extends AuthorizingRealm {
 	
-	private final MessageConfig messages;
-	private final ShiroAccountProvider accountProvider;
+	private MessageConfig messages;
+	private ShiroAccountProvider accountProvider;
 	
-	public AccountPasswdRealm(MessageConfig messages,ShiroAccountProvider accountProvider){
-		this.messages = messages;
-		this.accountProvider = accountProvider;
-	}
-
 	public Class<?> getAuthenticationTokenClass() {
 		return UsernamePasswordToken.class;
 	}
@@ -56,6 +50,7 @@ public class AccountPasswdRealm extends AuthorizingRealm {
 	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+
 		if(null==token.getPrincipal()||null==token.getCredentials()){
 			throw new AuthenticationException(messages.getMsgAccountPasswordEmpty());
 		}
@@ -81,5 +76,12 @@ public class AccountPasswdRealm extends AuthorizingRealm {
 		if(null!=permissions&&!permissions.isEmpty())
 			info.setStringPermissions(permissions);
         return info;  
+	}
+
+	public void setMessages(MessageConfig messages) {
+		this.messages = messages;
+	}
+	public void setAccountProvider(ShiroAccountProvider accountProvider) {
+		this.accountProvider = accountProvider;
 	}
 }

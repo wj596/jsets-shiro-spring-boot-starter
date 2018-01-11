@@ -21,10 +21,16 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.jsets.shiro.cache.CacheDelegator;
 import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
-import org.jsets.shiro.model.StatelessAccount;
+import org.jsets.shiro.model.StatelessLogined;
 import org.jsets.shiro.service.ShiroCryptoService;
+import org.jsets.shiro.service.ShiroStatelessAccountProvider;
+import org.jsets.shiro.util.Commons;
+
+import com.google.common.base.Strings;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;
 
@@ -36,35 +42,55 @@ import io.jsonwebtoken.SignatureException;
  */
 public class JsetsJwtMatcher implements CredentialsMatcher {
 	
-	private final ShiroProperties shiroProperties;
-	private final MessageConfig messages;
-	private final ShiroCryptoService cryptoService;
+	private  ShiroProperties properties;
+	private  MessageConfig messages;
+	private  ShiroCryptoService cryptoService;
+	private  ShiroStatelessAccountProvider accountProvider;
+	private  CacheDelegator cacheDelegator;
 
-	public JsetsJwtMatcher(ShiroProperties shiroProperties,MessageConfig messages,ShiroCryptoService cryptoService){
-		this.shiroProperties = shiroProperties;
-		this.messages = messages;
-		this.cryptoService = cryptoService;
-	}
-	
 	@Override
 	public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
 		String jwt = (String) info.getCredentials();
-		StatelessAccount statelessAccount = null;
+		StatelessLogined statelessAccount = null;
 		try{
-			statelessAccount = this.cryptoService.parseJwt(jwt);
+			if(Commons.hasLen(this.properties.getJwtSecretKey())){
+				statelessAccount = this.cryptoService.parseJwt(jwt);
+			} else {
+				String appId = (String) Commons.readValue(Commons.parseJwtPayload(jwt)).get("subject");
+				String appKey = accountProvider.loadAppKey(appId);
+				if(Strings.isNullOrEmpty(appKey)) 
+					throw new AuthenticationException(MessageConfig.MSG_NO_SECRET_KEY);
+				statelessAccount = this.cryptoService.parseJwt(jwt,appKey);
+			}
+			
 		} catch(SignatureException e){
-			throw new AuthenticationException(shiroProperties.getJwtSecretKey());
+			throw new AuthenticationException(this.properties.getJwtSecretKey());
 		} catch(ExpiredJwtException e){
-			throw new AuthenticationException(messages.getMsgJwtTimeout());
+			throw new AuthenticationException(this.messages.getMsgJwtTimeout());
 		} catch(Exception e){
-			throw new AuthenticationException(messages.getMsgJwtError());
+			throw new AuthenticationException(this.messages.getMsgJwtError());
 		}
 		if(null == statelessAccount){
-			throw new AuthenticationException(messages.getMsgJwtError());
+			throw new AuthenticationException(this.messages.getMsgJwtError());
 		}
-		// 可以做签发方验证
-		// 可以做接收方验证
+		String tokenId = statelessAccount.getTokenId();
+		if(this.properties.isJwtBurnEnabled()
+				&&this.cacheDelegator.cutBurnedToken(tokenId)){
+			throw new AuthenticationException(MessageConfig.MSG_BURNED_TOKEN);
+		}
         return true;
 	}
 
+	public void setProperties(ShiroProperties properties) {
+		this.properties = properties;
+	}
+	public void setCryptoService(ShiroCryptoService cryptoService) {
+		this.cryptoService = cryptoService;
+	}
+	public void setMessages(MessageConfig messages) {
+		this.messages = messages;
+	}
+	public void setCacheDelegator(CacheDelegator cacheDelegator) {
+		this.cacheDelegator = cacheDelegator;
+	}
 }

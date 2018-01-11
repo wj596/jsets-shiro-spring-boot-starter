@@ -43,13 +43,9 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsetsFormAuthenticationFilter.class);
 	
-	private final ShiroProperties shiroProperties;
-	private final MessageConfig messages;
+	private  ShiroProperties properties;
+	private  MessageConfig messages;
 
-	public JsetsFormAuthenticationFilter(ShiroProperties shiroProperties,MessageConfig messages){
-		this.shiroProperties = shiroProperties;
-		this.messages = messages;
-	}
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
@@ -73,13 +69,13 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
     	if (isLoginRequest(request, response)) {
             if (isLoginSubmission(request, response)) {//是否登陆请求
                 // 是否启用验证码
-                if(this.shiroProperties.isJcaptchaEnable()){
+                if(this.properties.isJcaptchaEnable()){
                 	String jcaptcha = WebUtils.getCleanParam(request, ShiroProperties.PARAM_JCAPTCHA);
                 	if(Strings.isNullOrEmpty(jcaptcha)){
-                		return onJcaptchaFailure(request, response,messages.getMsgCaptchaEmpty());
+                		return onJcaptchaFailure(request, response,this.messages.getMsgCaptchaEmpty());
                 	}
                 	if(!JCaptchaUtil.validateCaptcha(WebUtils.toHttp(request), jcaptcha)){
-                		return onJcaptchaFailure(request, response,messages.getMsgCaptchaError());
+                		return onJcaptchaFailure(request, response,this.messages.getMsgCaptchaError());
                 	}
                 }
                 return executeLogin(request, response);
@@ -125,5 +121,11 @@ public class JsetsFormAuthenticationFilter extends FormAuthenticationFilter {
 		return true;
 	}
 
+	public void setProperties(ShiroProperties properties) {
+		this.properties = properties;
+	}
+	public void setMessages(MessageConfig messages) {
+		this.messages = messages;
+	}
 
 }

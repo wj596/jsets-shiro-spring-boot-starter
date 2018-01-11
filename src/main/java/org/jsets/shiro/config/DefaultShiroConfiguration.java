@@ -17,13 +17,11 @@
  */
 package org.jsets.shiro.config;
 
-import org.jsets.shiro.service.DefaultShiroAccountProviderImpl;
-import org.jsets.shiro.service.ShiroAccountProvider;
+import org.jsets.shiro.service.DefaultAccountProvider;
 import org.jsets.shiro.service.ShiroCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
-
 /**
  * 默认配置
  *
@@ -39,17 +37,16 @@ public class DefaultShiroConfiguration extends JsetsShiroConfigurationAdapter{
 	
 	@Override
 	protected void configure(SecurityManagerConfig securityManager) {
-		
-		ShiroAccountProvider accountProvider 
-							= new DefaultShiroAccountProviderImpl(this.shiroCryptoService);
-		securityManager.setAccountProvider(accountProvider);
 		System.out.println("欢迎使用： jsets-shiro-spring-boot-starter");
 		System.out.println("已为您创建体验账号： test,密码test");
+		DefaultAccountProvider defAccountProvider = new DefaultAccountProvider();
+		defAccountProvider.setShiroCryptoService(shiroCryptoService);
+		securityManager.setAccountProvider(defAccountProvider);
 	}
 
 	@Override
 	protected void configure(FilterChainConfig filterChain) {
-
+		
 	}
 
 }

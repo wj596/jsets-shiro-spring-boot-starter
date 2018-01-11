@@ -17,27 +17,22 @@
  */
 package org.jsets.shiro.model;
 
-import java.io.Serializable;
+import com.google.common.base.Strings;
 
 /**
- * 自由定制的过滤规则
+ * 自由定制的权限验证规则
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  *
  */
-public class CustomRule implements Serializable{
+public class CustomRule extends AuthorizeRule{
 
 	private static final long serialVersionUID = 1L;
 	
 	private String url;// 资源URL
 	private String rule;// 过滤规则
-	
-	public CustomRule(String url,String rule){
-		this.url = url;
-		this.rule = rule;
-	}
-	
+
 	public String getUrl() {
 		return url;
 	}
@@ -51,4 +46,11 @@ public class CustomRule implements Serializable{
 		this.rule = rule;
 	}
 
+	@Override
+	public StringBuilder toFilterChain() {
+		if(Strings.isNullOrEmpty(this.getUrl())) return null;
+		if(Strings.isNullOrEmpty(this.getRule())) return null;
+		return new StringBuilder(this.getRule());
+	}
+	
 }

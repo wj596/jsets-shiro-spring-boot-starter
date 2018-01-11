@@ -28,11 +28,8 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.token.JwtToken;
 import org.jsets.shiro.util.Commons;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.jsonwebtoken.MalformedJwtException;
 /**
  * 基于JWT（ JSON WEB TOKEN）的控制域
@@ -41,14 +38,8 @@ import io.jsonwebtoken.MalformedJwtException;
  * @date 2016年6月31日
  */
 public class JwtRealm extends AuthorizingRealm{
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(JwtRealm.class);
-	
-	private final MessageConfig messages;
-	
-	public JwtRealm(MessageConfig messages){
-		this.messages = messages;
-	}
+
+	private MessageConfig messages;
 	
 	public Class<?> getAuthenticationTokenClass() {
 		return JwtToken.class;
@@ -59,7 +50,6 @@ public class JwtRealm extends AuthorizingRealm{
 	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-		LOGGER.info("JWT 认证开始");
 		// 只认证JwtToken
 		if(!(token instanceof JwtToken)) return null;
 		String jwt = ((JwtToken)token).getJwt();
@@ -69,12 +59,12 @@ public class JwtRealm extends AuthorizingRealm{
 			// 没有做任何的签名校验
 			 payload = Commons.parseJwtPayload(jwt);
 		} catch(MalformedJwtException e){
-			throw new AuthenticationException(messages.getMsgJwtMalformed());
+			throw new AuthenticationException(this.messages.getMsgJwtMalformed());
 		} catch(Exception e){
-			throw new AuthenticationException(messages.getMsgJwtError());
+			throw new AuthenticationException(this.messages.getMsgJwtError());
 		}
 		if(null == payload){
-			throw new AuthenticationException(messages.getMsgJwtError());
+			throw new AuthenticationException(this.messages.getMsgJwtError());
 		}
 		return new SimpleAuthenticationInfo("jwt:"+payload,jwt,this.getName());
 	}
@@ -84,12 +74,12 @@ public class JwtRealm extends AuthorizingRealm{
      */  
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-		LOGGER.info("JWT 授权开始");
+		
 		String payload = (String) principals.getPrimaryPrincipal();
 		// likely to be json, parse it:
 		if (payload.startsWith("jwt:") && payload.charAt(4) == '{' 
 									   && payload.charAt(payload.length() - 1) == '}') { 
-			
+
             Map<String, Object> payloadMap = Commons.readValue(payload.substring(4));
     		Set<String> roles = Commons.split((String)payloadMap.get("roles"));
     		Set<String> permissions = Commons.split((String)payloadMap.get("perms"));
@@ -101,5 +91,9 @@ public class JwtRealm extends AuthorizingRealm{
     		 return info;
         }
         return null;
+	}
+
+	public void setMessages(MessageConfig messages) {
+		this.messages = messages;
 	}
 }

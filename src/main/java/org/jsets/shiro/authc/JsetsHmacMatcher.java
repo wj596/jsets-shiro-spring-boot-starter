@@ -22,12 +22,16 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.jsets.shiro.cache.CacheDelegator;
 import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
-import org.jsets.shiro.model.StatelessAccount;
+import org.jsets.shiro.model.StatelessLogined;
 import org.jsets.shiro.service.ShiroCryptoService;
 import org.jsets.shiro.service.ShiroStatelessAccountProvider;
 import org.jsets.shiro.token.HmacToken;
+import org.jsets.shiro.util.Commons;
+
+import com.google.common.base.Strings;
 
 /**
  * HMAC签名匹配器
@@ -37,46 +41,70 @@ import org.jsets.shiro.token.HmacToken;
  */
 public class JsetsHmacMatcher implements CredentialsMatcher {
 
-	private final ShiroProperties shiroProperties;
-	private final MessageConfig messages;
-	private final ShiroCryptoService cryptoService;
-	private final ShiroStatelessAccountProvider accountProvider;
+	private  ShiroProperties properties;
+	private  MessageConfig messages;
+	private  ShiroCryptoService cryptoService;
+	private  ShiroStatelessAccountProvider accountProvider;
+	private  CacheDelegator cacheDelegator;
 
-	public JsetsHmacMatcher(ShiroProperties shiroProperties,MessageConfig messages
-			,ShiroCryptoService cryptoService,ShiroStatelessAccountProvider accountProvider){
-		this.shiroProperties = shiroProperties;
-		this.messages = messages;
-		this.cryptoService = cryptoService;
-		this.accountProvider = accountProvider;
-	}
-	
 	@Override
 	public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
 		HmacToken hmacToken = (HmacToken)token;
 		String appId = hmacToken.getAppId();
 		String digest = (String) info.getCredentials();
-		String serverDigest = cryptoService.hmacDigest(hmacToken.getBaseString(),this.accountProvider.loadAppKey(appId));
+		String serverDigest = null;
+		if(this.properties.isHmacBurnEnabled()
+					&&this.cacheDelegator.cutBurnedToken(digest)){
+			throw new AuthenticationException(MessageConfig.MSG_BURNED_TOKEN);
+		}
+		if(Commons.hasLen(this.properties.getHmacSecretKey())){
+			serverDigest = this.cryptoService.hmacDigest(hmacToken.getBaseString());
+		} else {
+			String appKey = accountProvider.loadAppKey(appId);
+			if(Strings.isNullOrEmpty(appKey)) 
+				throw new AuthenticationException(MessageConfig.MSG_NO_SECRET_KEY);
+			serverDigest = this.cryptoService.hmacDigest(hmacToken.getBaseString(),appKey);
+		}
+		
+		if(Strings.isNullOrEmpty(serverDigest)){
+			throw new AuthenticationException(this.messages.getMsgHmacError());
+		}
 		if(!serverDigest.equals(digest)){
-			throw new AuthenticationException(messages.getMsgHmacError());
+			throw new AuthenticationException(this.messages.getMsgHmacError());
 		}
 		Long currentTimeMillis = System.currentTimeMillis();
 		Long tokenTimestamp = Long.valueOf(hmacToken.getTimestamp());
 		// 数字签名超时失效
-		if ((currentTimeMillis-tokenTimestamp) > this.shiroProperties.getHmacPeriod()) {
-			throw new AuthenticationException(messages.getMsgHmacTimeout());
+		if ((currentTimeMillis-tokenTimestamp) > this.properties.getHmacPeriod()) {
+			throw new AuthenticationException(this.messages.getMsgHmacTimeout());
 		}
 		// 检查账号
 		boolean checkAccount = this.accountProvider.checkAccount(appId);
 		if(!checkAccount){
-			throw new AuthenticationException(messages.getMsgAccountException());
+			throw new AuthenticationException(this.messages.getMsgAccountException());
 		}
-		StatelessAccount statelessAccount = new StatelessAccount();
+		StatelessLogined statelessAccount = new StatelessLogined();
 		statelessAccount.setTokenId(hmacToken.getDigest());
 		statelessAccount.setAppId(hmacToken.getAppId());
 		statelessAccount.setHost(hmacToken.getHost());
 		statelessAccount.setIssuedAt(new Date(tokenTimestamp));
-		StatelessLocal.setAccount(statelessAccount);
+		StatelessLocals.setAccount(statelessAccount);
 		return true;
 	}
 
+	public void setProperties(ShiroProperties properties) {
+		this.properties = properties;
+	}
+	public void setCryptoService(ShiroCryptoService cryptoService) {
+		this.cryptoService = cryptoService;
+	}
+	public void setAccountProvider(ShiroStatelessAccountProvider accountProvider) {
+		this.accountProvider = accountProvider;
+	}
+	public void setMessages(MessageConfig messages) {
+		this.messages = messages;
+	}
+	public void setCacheDelegator(CacheDelegator cacheDelegator) {
+		this.cacheDelegator = cacheDelegator;
+	}
 }

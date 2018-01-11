@@ -25,7 +25,7 @@ import java.util.Date;
  * @date 2016年6月31日
  *
  */
-public class StatelessAccount implements Account{
+public class StatelessLogined implements Account{
 
 	private static final long serialVersionUID = -895875540581785581L;
 	

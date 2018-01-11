@@ -24,7 +24,7 @@ import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.jsets.shiro.config.ShiroProperties;
-
+import org.jsets.shiro.util.Commons;
 /**
  * cache功能委托类
  * 
@@ -32,16 +32,16 @@ import org.jsets.shiro.config.ShiroProperties;
  * @date 2016年6月31日
  */
 public class CacheDelegator {
-	
+
 	private CacheManager cacheManager;
+	private short cacheType;
 	private final Object cacheMonitor = new Object();
 
 	/**
 	 * 获取并增加密码重试次数
 	 */
 	public int incPasswdRetryCount(String account){
-		Cache<String,Integer> cache = 
-				   this.getCacheManager().getCache(ShiroProperties.CACHE_NAME_PASSWORD_RETRY);
+		Cache<String,Integer> cache = this.cacheManager.getCache(ShiroProperties.CACHE_NAME_PASSWORD_RETRY);
 		synchronized (cacheMonitor) {
 			Integer count = cache.get(account);
 			if (null == count) {
@@ -55,8 +55,7 @@ public class CacheDelegator {
 	 * 清扫密码重试次数
 	 */
 	public void cleanPasswdRetryCount(String account){
-		Cache<String,AtomicInteger> cache = 
-				   this.getCacheManager().getCache(ShiroProperties.CACHE_NAME_PASSWORD_RETRY);
+		Cache<String,AtomicInteger> cache = this.cacheManager.getCache(ShiroProperties.CACHE_NAME_PASSWORD_RETRY);
 		cache.remove(account);
 	}
 	
@@ -64,9 +63,7 @@ public class CacheDelegator {
 	 * 获取保持登陆状态的用户
 	 */
 	public String getKeepUser(String account){
-		
-		Cache<String,String> cache = 
-				    this.getCacheManager().getCache(ShiroProperties.CACHE_NAME_KEEP_ONE_USER);
+		Cache<String,String> cache = this.cacheManager.getCache(ShiroProperties.CACHE_NAME_KEEP_ONE_USER);
 		return cache.get(account);
 	}
 	
@@ -74,9 +71,7 @@ public class CacheDelegator {
 	 * 缓存保持登陆状态的用户
 	 */
 	public String putKeepUser(String account,String sessionId){
-		
-		Cache<String,String> cache = 
-				    this.getCacheManager().getCache(ShiroProperties.CACHE_NAME_KEEP_ONE_USER);
+		Cache<String,String> cache =  this.cacheManager.getCache(ShiroProperties.CACHE_NAME_KEEP_ONE_USER);
 		return cache.put(account, sessionId);
 	}
 	
@@ -85,19 +80,35 @@ public class CacheDelegator {
 	 */
 	public void clearAuthCache(String account,String realmName){
 		synchronized (cacheMonitor) {
-			Cache<String, AuthenticationInfo> authenticationCache = 
-				    this.getCacheManager().getCache(ShiroProperties.CACHE_NAME_AUTHENTICATION);
-			Cache<Object,AuthorizationInfo> authorizationCache = 
-				     this.getCacheManager().getCache(ShiroProperties.CACHE_NAME_AUTHORIZATION);
+			Cache<String, AuthenticationInfo> authenticationCache = this.cacheManager.getCache(ShiroProperties.CACHE_NAME_AUTHENTICATION);
+			Cache<Object,AuthorizationInfo> authorizationCache = this.cacheManager.getCache(ShiroProperties.CACHE_NAME_AUTHORIZATION);
 			authenticationCache.remove(account);
 			authorizationCache.remove(new SimplePrincipalCollection(account,realmName));
 		}
 	}
-	
-	public CacheManager getCacheManager() {
-		return cacheManager;
+
+	/**
+	 * 是否是销毁的token
+	 */
+	public boolean cutBurnedToken(String token){
+		if(Commons.CACHE_TYPE_MAP == this.cacheType) return false;
+		Cache<String,Integer> cache =  this.cacheManager.getCache(ShiroProperties.CACHE_NAME_TOKEN_BURNERS);
+		Integer burned = cache.get(token);
+		if(null == burned){
+			cache.put(token, Integer.valueOf(0));
+			if(Commons.CACHE_TYPE_REDIS == this.cacheType){
+				RedisCacheManager redisCacheManager = (RedisCacheManager)cacheManager;
+				redisCacheManager.setRedisTimeout(ShiroProperties.CACHE_NAME_TOKEN_BURNERS,86400l);
+			}
+			return false;
+		}
+		return true;
 	}
+	
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
+	}
+	public void setCacheType(short cacheType) {
+		this.cacheType = cacheType;
 	}
 }

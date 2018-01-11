@@ -17,15 +17,14 @@
  */
 package org.jsets.shiro.filter.stateless;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.CollectionUtils;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.jsets.shiro.config.MessageConfig;
@@ -66,15 +65,15 @@ public abstract class StatelessFilter extends AccessControlFilter{
             String parameterName = namesEnumeration.nextElement();
             parameterNames.add(parameterName);
         }
-		Collections.sort(parameterNames);// 排序参数->自然顺序
 		StringBuilder baseString = new StringBuilder();
-		for (String parameterName : parameterNames) {
-			if(!ShiroProperties.PARAM_HMAC_APP_ID.equals(parameterName)
-				&&!ShiroProperties.PARAM_HMAC_TIMESTAMP.equals(parameterName)
-				&&!ShiroProperties.PARAM_HMAC_DIGEST.equals(parameterName)){
-				baseString.append(request.getParameter(parameterName));
-			}
-		}
+		parameterNames.stream()
+			.sorted()
+			.forEach(name -> {
+				if(!ShiroProperties.PARAM_HMAC_APP_ID.equals(name)
+					&&!ShiroProperties.PARAM_HMAC_TIMESTAMP.equals(name)
+					&&!ShiroProperties.PARAM_HMAC_DIGEST.equals(name))
+					baseString.append(request.getParameter(name));
+		});
 		baseString.append(appId);
 		baseString.append(timestamp);
 		String host = request.getRemoteHost();
@@ -97,12 +96,8 @@ public abstract class StatelessFilter extends AccessControlFilter{
         if (rolesArray == null || rolesArray.length == 0) {
             return true;
         }
-        List<String> roles = CollectionUtils.asList(rolesArray);
-        boolean[] hasRoles = subject.hasRoles(roles);
-        for(boolean hasRole:hasRoles){
-        	if(hasRole) return true;
-        }
-        return false;
+        return Stream.of(rolesArray)
+        			.anyMatch(role->subject.hasRole(role));
 	}
 	
 	protected boolean checkPerms(Subject subject, Object mappedValue){

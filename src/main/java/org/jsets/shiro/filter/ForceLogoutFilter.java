@@ -36,11 +36,7 @@ public class ForceLogoutFilter extends JsetsAccessControlFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ForceLogoutFilter.class);
 
-	private final ShiroProperties shiroProperties;
-
-	public ForceLogoutFilter(ShiroProperties shiroProperties) {
-		this.shiroProperties = shiroProperties;
-	}
+	private ShiroProperties properties;
 	
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
@@ -55,9 +51,12 @@ public class ForceLogoutFilter extends JsetsAccessControlFilter {
 		Session currentSession = subject.getSession();
         if (null!=currentSession.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_FORCE_LOGOUT)) {
         	subject.logout();
-			return this.respondRedirect(request, response,this.shiroProperties.getForceLogoutUrl());
+			return this.respondRedirect(request, response,this.properties.getForceLogoutUrl());
         }
         return true;
 	}
 
+	public void setProperties(ShiroProperties properties) {
+		this.properties = properties;
+	}
 }

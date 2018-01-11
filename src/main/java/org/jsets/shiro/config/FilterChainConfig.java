@@ -24,15 +24,17 @@ import org.jsets.shiro.service.ShiroFilteRulesProvider;
 import com.google.common.collect.Maps;
 
 /**
- * 过滤器链应用端配置
+ * shiro 过滤器链配置
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
 public class FilterChainConfig{
 	
-	private ShiroFilteRulesProvider shiroFilteRulesProvider;
 	private final Map<String, Filter> filters = Maps.newLinkedHashMap();
+	private ShiroFilteRulesProvider shiroFilteRulesProvider;
+
+	protected FilterChainConfig(){};
 	
 	/**
 	 *  设置过滤规则提供者，实现动态URL鉴权过滤
