@@ -46,7 +46,7 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 
 #### [HMAC鉴权说明](https://www.jianshu.com/p/b0a577708a7b) 
-#### [JWT明](https://www.jianshu.com/p/0a5d3d07a151) 
+#### [JWT鉴权说明](https://www.jianshu.com/p/0a5d3d07a151) 
 #### [组件效果预览](https://www.jianshu.com/p/40d11d18ead6) 
 
 
