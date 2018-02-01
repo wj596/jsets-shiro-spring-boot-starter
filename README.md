@@ -43,3 +43,11 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 #### [示例项目](https://github.com/wj596/jsets-shiro-demo)
 
 如果组件给您带来过帮助，请Star收藏，欢迎提出改进意见，欢迎提交改进代码。
+
+
+#### [HMAC鉴权说明](https://www.jianshu.com/p/b0a577708a7b) 
+#### [JWT鉴权说明](https://www.jianshu.com/p/0a5d3d07a151) 
+#### [组件效果预览](https://www.jianshu.com/p/40d11d18ead6) 
+
+
+
