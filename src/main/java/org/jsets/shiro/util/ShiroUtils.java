@@ -229,33 +229,25 @@ public class ShiroUtils {
 		return filterManager;
 	}
 	
-	
 	public static void setShiroProperties(ShiroProperties shiroProperties) {
-		if(null != ShiroUtils.shiroProperties) throw new UnsupportedOperationException();
 		ShiroUtils.shiroProperties = shiroProperties;
 	}
 	public static void setCryptoService(ShiroCryptoService cryptoService) {
-		if(null != ShiroUtils.cryptoService) throw new UnsupportedOperationException();
 		ShiroUtils.cryptoService = cryptoService;
 	}
 	public static void setSessionManager(DefaultWebSessionManager sessionManager) {
-		if(null != ShiroUtils.sessionManager) throw new UnsupportedOperationException();
 		ShiroUtils.sessionManager = sessionManager;
 	}
 	public static void setShiroCacheDelegator(CacheDelegator shiroCacheDelegator) {
-		if(null != ShiroUtils.shiroCacheDelegator) throw new UnsupportedOperationException();
 		ShiroUtils.shiroCacheDelegator = shiroCacheDelegator;
 	}
 	public static void setRealmManager(RealmManager realmManager) {
-		if(null != ShiroUtils.realmManager) throw new UnsupportedOperationException();
 		ShiroUtils.realmManager = realmManager;
 	}
 	public static void setShiroFilterFactoryBean(ShiroFilterFactoryBean shiroFilterFactoryBean) {
-		if(null != ShiroUtils.shiroFilterFactoryBean) throw new UnsupportedOperationException();
 		ShiroUtils.shiroFilterFactoryBean = shiroFilterFactoryBean;
 	}
 	public static void setFilterManager(FilterManager filterManager) {
-		if(null != ShiroUtils.filterManager) throw new UnsupportedOperationException();
 		ShiroUtils.filterManager = filterManager;
 	}
 }
