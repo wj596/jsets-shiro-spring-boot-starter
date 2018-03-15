@@ -186,7 +186,12 @@ public class ShiroUtils {
 		}
 		return Boolean.FALSE;
 	}
-	
+	/**
+	 * 获取当前Ssssion
+	 */
+	public static Session getSession() {
+		return SecurityUtils.getSubject().getSession();
+	}
 	/**
 	 * 删除account的认证、授权缓存
 	 * <br>如果启用了auth缓存，当用户的认证信息和角色信息发生了改变，一定要执行此操作。

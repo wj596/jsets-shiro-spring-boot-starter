@@ -24,6 +24,8 @@ import javax.servlet.ServletResponse;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.CollectionUtils;
 
+import com.google.common.collect.Lists;
+
 /**
  * 重写RolesAuthorizationFilter，使其继承自JsetsAuthorizationFilter;
  * <br>修改了匹配逻辑，只要当前用户有一个角色满足URL所需角色就放行
@@ -37,7 +39,7 @@ public class JsetsRolesAuthorizationFilter extends JsetsAuthorizationFilter{
     	Subject subject = getSubject(request, response);
         String[] rolesArray = (String[]) mappedValue;
         if (rolesArray == null || rolesArray.length == 0) {
-            return true;
+        	return true;
         }
         List<String> roles = CollectionUtils.asList(rolesArray);
         boolean[] hasRoles = subject.hasRoles(roles);

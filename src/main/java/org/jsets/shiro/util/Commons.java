@@ -73,7 +73,8 @@ public abstract class Commons {
 	public static final short CACHE_TYPE_MAP = 0;
 	public static final short CACHE_TYPE_EHCACHE = 1;
 	public static final short CACHE_TYPE_REDIS = 2;
-	public static final short CACHE_TYPE_OTHER = 3;
+	public static final short CACHE_TYPE_CUSTOM = 3;
+	public static final short CACHE_TYPE_SPRING = 4;
 	
 	public static final String REMEMBERME_COOKIE_NAME = "rememberMeCookie";
 	

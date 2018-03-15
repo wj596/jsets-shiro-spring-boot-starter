@@ -30,12 +30,17 @@ import org.jsets.shiro.authc.JsetsSubjectFactory;
 import org.jsets.shiro.cache.CacheDelegator;
 import org.jsets.shiro.cache.MapCacheManager;
 import org.jsets.shiro.cache.RedisCacheManager;
+import org.jsets.shiro.cache.SpringCacheManager;
 import org.jsets.shiro.filter.FilterManager;
 import org.jsets.shiro.handler.DefaultSessionListener;
 import org.jsets.shiro.realm.RealmManager;
 import org.jsets.shiro.service.ShiroCryptoService;
 import org.jsets.shiro.util.Commons;
 import org.jsets.shiro.util.ShiroUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -48,7 +53,6 @@ import org.apache.shiro.codec.CodecSupport;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.session.SessionListener;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 /**
  * SHIRO构造器
@@ -57,7 +61,10 @@ import com.google.common.collect.Lists;
  * @date 2016年6月31日
  */
 public class JsetsShiroManager {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(JsetsShiroManager.class);
 
+	private final BeanFactory beanFactory;
 	private final ShiroProperties properties;
 	private final SecurityManagerConfig managerConfig;
 	private final FilterChainConfig filterConfig;
@@ -70,13 +77,13 @@ public class JsetsShiroManager {
 	private FilterManager filterManager;
 	private DefaultWebSecurityManager securityManager;
 	private ShiroFilterFactoryBean shiroFilterFactoryBean;
-	private RedisConnectionFactory redisConnectionFactory;
 	private ShiroCryptoService cryptoService;
 	private short cacheType = Commons.CACHE_TYPE_MAP;
 	private final AtomicBoolean initialized = new AtomicBoolean(Boolean.FALSE);
 
-	protected JsetsShiroManager(ShiroProperties properties, SecurityManagerConfig managerConfig,
-			FilterChainConfig filterConfig) {
+	protected JsetsShiroManager(BeanFactory beanFactory,ShiroProperties properties, 
+						SecurityManagerConfig managerConfig,FilterChainConfig filterConfig) {
+		this.beanFactory = beanFactory;
 		this.properties = properties;
 		this.managerConfig = managerConfig;
 		this.filterConfig = filterConfig;
@@ -130,37 +137,52 @@ public class JsetsShiroManager {
 	}
 
 	private void buildCacheManager() {
+		// 使用用户定制的CacheManager
 		if (null != this.managerConfig.getCacheManager()) {
-			this.setCacheType(Commons.CACHE_TYPE_OTHER);
+			this.setCacheType(Commons.CACHE_TYPE_CUSTOM);
 			this.cacheManager = this.managerConfig.getCacheManager();
-		} else {
-			boolean enabledEhcache = this.properties.isEhcacheEnabled();
-			boolean enabledRedis = this.properties.isRedisEnabled();
-			if (enabledEhcache && enabledRedis) {
-				enabledRedis = Boolean.FALSE;
-			}
-			if (enabledEhcache && !Strings.isNullOrEmpty(this.properties.getEhcacheConfigFile())) {
+			return;
+		} 
+		// 使用Spring CacheManager
+		DefaultListableBeanFactory listableBeanFactory = (DefaultListableBeanFactory) this.beanFactory;
+		if (listableBeanFactory.getBeanNamesForType(org.springframework.cache.CacheManager.class).length>0) {
+			org.springframework.cache.CacheManager springCacheManager = 
+								listableBeanFactory.getBean(org.springframework.cache.CacheManager.class);
+			
+			if(null!=springCacheManager// EhCache
+						&&springCacheManager instanceof org.springframework.cache.ehcache.EhCacheCacheManager){
 				EhCacheManager ehCacheManager = new EhCacheManager();
-				ehCacheManager.setCacheManagerConfigFile(this.properties.getEhcacheConfigFile());
+				ehCacheManager.setCacheManager(((org.springframework.cache.ehcache.EhCacheCacheManager)springCacheManager).getCacheManager());
 				this.setCacheType(Commons.CACHE_TYPE_EHCACHE);
 				this.cacheManager = ehCacheManager;
-			} else if (enabledRedis && null != this.redisConnectionFactory) {
-				RedisCacheManager redisCacheManager = new RedisCacheManager();
+				return;
+			}
+			if(null!=springCacheManager// Redis
+					&&springCacheManager instanceof org.springframework.data.redis.cache.RedisCacheManager){
+				RedisConnectionFactory redisConnectionFactory = this.beanFactory.getBean(RedisConnectionFactory.class);
 				GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
 				RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<Object, Object>();
-				redisTemplate.setConnectionFactory(this.redisConnectionFactory);
+				redisTemplate.setConnectionFactory(redisConnectionFactory);
 				redisTemplate.setKeySerializer(jsonSerializer);
 				redisTemplate.setHashKeySerializer(jsonSerializer);
 				redisTemplate.setBeanClassLoader(this.getClass().getClassLoader());
 				redisTemplate.afterPropertiesSet();
+				RedisCacheManager redisCacheManager = new RedisCacheManager();
 				redisCacheManager.setRedisTemplate(redisTemplate);
 				this.setCacheType(Commons.CACHE_TYPE_REDIS);
 				this.cacheManager = redisCacheManager;
-			} else {
-				this.setCacheType(Commons.CACHE_TYPE_MAP);
-				this.cacheManager = new MapCacheManager();
+				return;
 			}
-		}
+			if(null!=springCacheManager){// OTHER
+				this.setCacheType(Commons.CACHE_TYPE_SPRING);
+				this.cacheManager = new SpringCacheManager(springCacheManager);
+				return;
+			}
+		} 
+		// 使用默认的CacheManager 
+		this.setCacheType(Commons.CACHE_TYPE_MAP);
+		this.cacheManager = new MapCacheManager();	
+		LOGGER.info("jsets-shiro cacheManager: "+this.cacheManager);
 	}
 
 	private void buildCacheDelegator() {
@@ -288,9 +310,9 @@ public class JsetsShiroManager {
 	public ShiroCryptoService getCryptoService() {
 		return cryptoService;
 	}
-	public void setRedisConnectionFactory(RedisConnectionFactory redisConnectionFactory) {
-		this.redisConnectionFactory = redisConnectionFactory;
-	}
+	//public void setRedisConnectionFactory(RedisConnectionFactory redisConnectionFactory) {
+		//this.redisConnectionFactory = redisConnectionFactory;
+	//}
 	public short getCacheType() {
 		return cacheType;
 	}

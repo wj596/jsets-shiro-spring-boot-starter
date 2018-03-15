@@ -17,6 +17,8 @@
  */
 package org.jsets.shiro.cache;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
@@ -32,7 +35,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("all")
 public class RedisCacheManager implements CacheManager{
 
 	private RedisTemplate redisTemplate;
@@ -54,5 +57,64 @@ public class RedisCacheManager implements CacheManager{
 
 	public void setRedisTemplate(RedisTemplate<Object, Object> redisTemplate) {
 		this.redisTemplate = redisTemplate;
+	}
+	
+	/**
+	 * 基于REDIS的缓存
+	 *
+	 * @author wangjie (https://github.com/wj596)
+	 * @date 2016年6月31日
+	 */
+	public static class RedisCache<K,V> implements Cache<K,V>{
+
+		private final HashOperations<String,K,V> redisTemplate;
+		private final String cacheName; 
+		
+		public RedisCache(HashOperations<String,K,V> redisTemplate,String cacheName){
+			this.redisTemplate = redisTemplate;
+			this.cacheName = cacheName;
+		}
+
+		@Override
+		public void clear() throws CacheException {
+			this.redisTemplate.delete(cacheName, keys());
+		}
+
+		@Override
+		public V get(K key) throws CacheException {
+			return this.redisTemplate.get(cacheName, key);
+		}
+
+		@Override
+		public Set<K> keys() {
+			return this.redisTemplate.keys(cacheName);
+		}
+
+		public V put(K key, V value) throws CacheException {
+			this.redisTemplate.put(cacheName, key, value);
+			return this.redisTemplate.get(cacheName, key);
+		}
+
+		@Override
+		public V remove(K key) throws CacheException {
+			V v = this.redisTemplate.get(cacheName, key);
+			this.redisTemplate.delete(cacheName, key);
+			return v;
+		}
+
+		@Override
+		public int size() {
+			return this.redisTemplate.size(cacheName).intValue();
+		}
+
+		@Override
+		public Collection<V> values() {
+			return this.redisTemplate.values(cacheName);
+		}
+		
+		@Override
+		public String toString() {
+			return "cacheName:"+this.cacheName+",size:"+this.size();
+		}
 	}
 }

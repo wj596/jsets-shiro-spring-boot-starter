@@ -88,7 +88,7 @@ public class CacheDelegator {
 	}
 
 	/**
-	 * 是否是销毁的token
+	 * 是否销毁的token
 	 */
 	public boolean cutBurnedToken(String token){
 		if(Commons.CACHE_TYPE_MAP == this.cacheType) return false;

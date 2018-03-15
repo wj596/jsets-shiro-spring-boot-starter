@@ -20,16 +20,15 @@ package org.jsets.shiro.config;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.jsets.shiro.service.ShiroCryptoService;
 import org.jsets.shiro.service.ShiroSecurityService;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.AbstractCachingConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-
 /**
  * shiro自动配置
  * 
@@ -39,14 +38,14 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 @Configuration
 @EnableConfigurationProperties(ShiroProperties.class)
 @Import(DefaultShiroConfiguration.class)
-@AutoConfigureAfter(RedisAutoConfiguration.class)
+@AutoConfigureAfter(AbstractCachingConfiguration.class)
 public class JsetsShiroAutoConfiguration {
 
 	@Autowired
+	private BeanFactory beanFactory;
+	@Autowired
 	private ShiroProperties properties;
-	@Autowired(required=false)
-	private RedisConnectionFactory redisConnectionFactory;
-	
+
 	@Bean
 	public BeanPostProcessor lifecycleBeanPostProcessor() {
 		return new LifecycleBeanPostProcessor();
@@ -56,14 +55,14 @@ public class JsetsShiroAutoConfiguration {
 	public ShiroCryptoService shiroCryptoService() {
 		return new ShiroCryptoService();
 	}
-
+	
 	@Bean
 	public JsetsShiroManager jsetsShiroManager(ShiroCryptoService shiroCryptoService) {
 		JsetsShiroManager shiroManager = new JsetsShiroManager(
-										 this.properties
+										 this.beanFactory
+										,this.properties
 										,new SecurityManagerConfig()
 										,new FilterChainConfig());
-		shiroManager.setRedisConnectionFactory(redisConnectionFactory);
 		shiroManager.setCryptoService(shiroCryptoService);
 		return shiroManager;
 	}

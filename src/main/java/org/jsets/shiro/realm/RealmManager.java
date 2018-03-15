@@ -67,13 +67,14 @@ public class RealmManager {
 		if (this.properties.isAuthCacheEnabled()) {
 			passwdRealm.setAuthorizationCacheName(ShiroProperties.CACHE_NAME_AUTHORIZATION);
 			passwdRealm.setAuthenticationCacheName(ShiroProperties.CACHE_NAME_AUTHENTICATION);
+			passwdRealm.setCachingEnabled(Boolean.TRUE);
 			passwdRealm.setAuthenticationCachingEnabled(Boolean.TRUE);
 			passwdRealm.setAuthorizationCachingEnabled(Boolean.TRUE);
-			passwdRealm.setCachingEnabled(Boolean.TRUE);
 			this.addCachedRealms(passwdRealm);
-		} 
+		}  else {
+			passwdRealm.setCachingEnabled(Boolean.FALSE);
+		}
 		this.addStatefulRealms(passwdRealm);
-		
 		if (this.properties.isHmacEnabled()) {
 			JsetsHmacMatcher hmacMatcher = new JsetsHmacMatcher();
 			hmacMatcher.setAccountProvider(this.statelessAccountProvider);
@@ -87,7 +88,6 @@ public class RealmManager {
 			hmacRealm.setCachingEnabled(Boolean.FALSE);
 			this.addStatelessRealms(hmacRealm);
 		}
-		
 		if (properties.isJwtEnabled()) {
 			JsetsJwtMatcher jwtMatcher = new JsetsJwtMatcher();
 			jwtMatcher.setProperties(this.properties);
