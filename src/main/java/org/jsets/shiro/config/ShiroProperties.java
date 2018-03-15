@@ -93,8 +93,6 @@ public class ShiroProperties {
 	private boolean jcaptchaEnable = Boolean.FALSE; // 是否启用验证码
 	private boolean keepOneEnabled = Boolean.FALSE; // 是否启用账号唯一用户登陆
 	private boolean forceLogoutEnable = Boolean.FALSE; // 是否启用强制用户下线
-	private boolean ehcacheEnabled = Boolean.FALSE; // 是否启用ehcache缓存
-	private boolean redisEnabled = Boolean.FALSE; // 是否启用redis缓存
 	private boolean authCacheEnabled = Boolean.FALSE;// 是否启用认证授权缓存
 	private boolean hmacEnabled = Boolean.FALSE; // 是否启用HMAC鉴权
 	private boolean hmacBurnEnabled = Boolean.FALSE; // 是否启用HMAC签名即时失效
@@ -246,18 +244,6 @@ public class ShiroProperties {
 	}
 	public void setKeepOneEnabled(boolean keepOneEnabled) {
 		this.keepOneEnabled = keepOneEnabled;
-	}
-	public boolean isEhcacheEnabled() {
-		return ehcacheEnabled;
-	}
-	public void setEhcacheEnabled(boolean ehcacheEnabled) {
-		this.ehcacheEnabled = ehcacheEnabled;
-	}
-	public boolean isRedisEnabled() {
-		return redisEnabled;
-	}
-	public void setRedisEnabled(boolean redisEnabled) {
-		this.redisEnabled = redisEnabled;
 	}
 	public boolean isForceLogoutEnable() {
 		return forceLogoutEnable;
