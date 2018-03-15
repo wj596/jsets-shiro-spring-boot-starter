@@ -22,13 +22,15 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 5、账号唯一用户登陆，一个账号只允许一个用户登陆。
 
-6、redis缓存支持，认证\授权数据缓存同步。
+6、与SpringCache无缝对接，支持guava、ehcache、redis等。
 
-7、动态URL过滤规则。
+7、提供认证\授权缓存数据同步接口，即时生效。
 
-8、无状态认证授权支持，共存有状态和无状态两种鉴权方式，无状态鉴权支持JWT(JSON WEB TOKEN)、HMAC(哈希消息认证码)两种协议。
+8、动态URL过滤规则。
 
-9、在线session管理，强制用户下线功能。
+9、无状态认证授权支持，共存有状态和无状态两种鉴权方式，无状态鉴权支持JWT(JSON WEB TOKEN)、HMAC(哈希消息认证码)两种协议。
+
+10、在线session管理，强制用户下线功能。
 
 #### 计划的功能
 
@@ -48,6 +50,3 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 #### [HMAC鉴权说明](https://www.jianshu.com/p/b0a577708a7b) 
 #### [JWT鉴权说明](https://www.jianshu.com/p/0a5d3d07a151) 
 #### [组件效果预览](https://www.jianshu.com/p/40d11d18ead6) 
-
-
-
