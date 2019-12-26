@@ -12,6 +12,8 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 你也可以用这个项目来深入的研究shiro。
 
+此项目一直应用在作者所在公司的所有项目，稳定性经得住考验。
+
 #### 实现的功能
 
 1、spring-boot-starter风格的开箱即用。
