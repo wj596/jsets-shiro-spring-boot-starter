@@ -32,13 +32,21 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 10、在线session管理，强制用户下线功能。
 
-#### 计划的功能
+#### V 1.1.0 更新说明
 
-1、cas单点登陆集成
+1、spring-boot 升级到2.1.1.RELEASE
 
-2、oauth2.0支持
+2、spring-data-redis升级到2.1.4.RELEASE
 
-#### [快速开始](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki/A%E3%80%81%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B?_blank)
+3、支持自定义jcaptcha验证码验证码
+
+3、新增鉴权监听器
+
+4、支持自定义密码加密算法
+
+5、调整部分类的组织方式，使暴露出来的API更易用
+
+#### [快速开始](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki/A%E3%80%81%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B?_blank?_blank)
 
 #### [使用说明](https://github.com/wj596/jsets-shiro-spring-boot-starter/wiki) 
 
@@ -46,6 +54,8 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 如果组件给您带来过帮助，请Star收藏，欢迎提出改进意见，欢迎提交改进代码。
 
+
+参考文档：
 
 #### [HMAC鉴权说明](https://www.jianshu.com/p/b0a577708a7b) 
 #### [JWT鉴权说明](https://www.jianshu.com/p/0a5d3d07a151) 
