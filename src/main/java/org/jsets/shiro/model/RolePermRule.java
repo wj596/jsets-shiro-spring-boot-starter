@@ -17,7 +17,7 @@
  */
 package org.jsets.shiro.model;
 
-import org.jsets.shiro.util.Commons;
+import org.jsets.shiro.util.CommonUtils;
 import com.google.common.base.Strings;
 /**
  * 基于角色/权限的权限验证规则
@@ -62,35 +62,35 @@ public class RolePermRule extends AuthorizeRule  {
 		StringBuilder sb = new StringBuilder();
 		if(AuthorizeRule.RULE_TYPE_DEF == this.getType()){
         	if(!Strings.isNullOrEmpty(this.getNeedRoles())){
-        		sb.append(Commons.FILTER_ROLES+"["+this.getNeedRoles()+"]");
+        		sb.append(CommonUtils.FILTER_ROLES+"["+this.getNeedRoles()+"]");
         	}
         	if(!Strings.isNullOrEmpty(this.getNeedPerms())){
         		if(sb.length()>0) sb.append(",");
-        		sb.append(Commons.FILTER_PERMS+"["+this.getNeedPerms()+"]");
+        		sb.append(CommonUtils.FILTER_PERMS+"["+this.getNeedPerms()+"]");
         	}
 		}
 		if(AuthorizeRule.RULE_TYPE_HMAC == this.getType()){
            	if(!Strings.isNullOrEmpty(this.getNeedRoles())){
-        		sb.append(Commons.FILTER_HMAC_ROLES+"["+this.getNeedRoles()+"]");
+        		sb.append(CommonUtils.FILTER_HMAC_ROLES+"["+this.getNeedRoles()+"]");
         	}
         	if(!Strings.isNullOrEmpty(this.getNeedPerms())){
         		if(sb.length()>0) sb.append(",");
-        		sb.append(Commons.FILTER_HMAC_PERMS+"["+this.getNeedPerms()+"]");
+        		sb.append(CommonUtils.FILTER_HMAC_PERMS+"["+this.getNeedPerms()+"]");
         	}
         	if(sb.length()==0) {
-        		sb.append(Commons.FILTER_HMAC);
+        		sb.append(CommonUtils.FILTER_HMAC);
         	}
 		}
 		if(AuthorizeRule.RULE_TYPE_JWT == this.getType()){
            	if(!Strings.isNullOrEmpty(this.getNeedRoles())){
-        		sb.append(Commons.FILTER_JWT_ROLES+"["+this.getNeedRoles()+"]");
+        		sb.append(CommonUtils.FILTER_JWT_ROLES+"["+this.getNeedRoles()+"]");
         	}
         	if(!Strings.isNullOrEmpty(this.getNeedPerms())){
         		if(sb.length()>0) sb.append(",");
-        		sb.append(Commons.FILTER_JWT_ROLES+"["+this.getNeedPerms()+"]");
+        		sb.append(CommonUtils.FILTER_JWT_ROLES+"["+this.getNeedPerms()+"]");
         	}
         	if(sb.length()==0) {
-        		sb.append(Commons.FILTER_JWT);
+        		sb.append(CommonUtils.FILTER_JWT);
         	}
 		}
 		return sb.length()>0?sb:null;

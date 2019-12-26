@@ -17,6 +17,8 @@
  */
 package org.jsets.shiro.filter;
 
+import java.util.Date;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.apache.shiro.session.Session;
@@ -26,6 +28,7 @@ import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.subject.Subject;
 import org.jsets.shiro.cache.CacheDelegator;
 import org.jsets.shiro.config.ShiroProperties;
+import org.jsets.shiro.listener.AuthListenerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
@@ -41,9 +44,18 @@ public class KeepOneUserFilter extends JsetsAccessControlFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(KeepOneUserFilter.class);
 	
-	private  ShiroProperties properties;
-	private  SessionManager sessionManager;
-	private  CacheDelegator cacheDelegate;
+	private final ShiroProperties properties;
+	private final CacheDelegator cacheDelegator;
+	private final SessionManager sessionManager;
+	private final AuthListenerManager authListenerManager;
+
+	public KeepOneUserFilter(ShiroProperties properties,CacheDelegator cacheDelegator
+					,SessionManager sessionManager,AuthListenerManager authListenerManager) {
+		this.properties = properties;
+		this.cacheDelegator = cacheDelegator;
+		this.sessionManager = sessionManager;
+		this.authListenerManager = authListenerManager;
+	}
 
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
@@ -57,19 +69,20 @@ public class KeepOneUserFilter extends JsetsAccessControlFilter {
 			return this.respondLogin(request, response);
 		}
 		String account = (String) subject.getPrincipal();
-		String loginedSessionId = this.cacheDelegate.getKeepUser(account);
+		String loginedSessionId = this.cacheDelegator.getKeepUser(account);
+		Session loginedSession = null;
 		Session currentSession = subject.getSession();
 		String currentSessionId = (String) currentSession.getId();
 		
 		if(currentSessionId.equals(loginedSessionId)) {
 			return true;
 		} else if (Strings.isNullOrEmpty(loginedSessionId)){
-			this.cacheDelegate.putKeepUser(account, currentSessionId);
+			this.cacheDelegator.putKeepUser(account, currentSessionId);
         	return true;
 		} else if (null==currentSession.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_KICKOUT)) {
-			this.cacheDelegate.putKeepUser(account, currentSessionId);
+			this.cacheDelegator.putKeepUser(account, currentSessionId);
 			try{
-				Session loginedSession = this.sessionManager.getSession(new DefaultSessionKey(loginedSessionId));
+				loginedSession = this.sessionManager.getSession(new DefaultSessionKey(loginedSessionId));
 				if(null != loginedSession){
 					loginedSession.setAttribute(ShiroProperties.ATTRIBUTE_SESSION_KICKOUT,Boolean.TRUE);
 				}
@@ -79,19 +92,16 @@ public class KeepOneUserFilter extends JsetsAccessControlFilter {
 		}
         if (null!=currentSession.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_KICKOUT)) {
         	subject.logout();
+        	String loginedHost = "";
+        	Date loginedTime = null;
+			if(null != loginedSession){
+				loginedHost = loginedSession.getHost();
+				loginedTime = loginedSession.getStartTimestamp();
+			}
+			this.authListenerManager.onKeepOneKickout(request, account, loginedHost, loginedTime);
 			return this.respondRedirect(request, response,this.properties.getKickoutUrl());
         }
 
 		return true;
-	}
-
-	public void setProperties(ShiroProperties properties) {
-		this.properties = properties;
-	}
-	public void setSessionManager(SessionManager sessionManager) {
-		this.sessionManager = sessionManager;
-	}
-	public void setCacheDelegate(CacheDelegator cacheDelegate) {
-		this.cacheDelegate = cacheDelegate;
 	}
 }

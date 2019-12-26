@@ -18,6 +18,7 @@
 package org.jsets.shiro.realm;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -27,10 +28,19 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.jsets.shiro.config.MessageConfig;
+import org.jsets.shiro.api.ShiroStatelessAccountProvider;
+import org.jsets.shiro.cache.CacheDelegator;
+import org.jsets.shiro.config.ShiroProperties;
+import org.jsets.shiro.model.StatelessAccount;
 import org.jsets.shiro.token.JwtToken;
-import org.jsets.shiro.util.Commons;
+import org.jsets.shiro.util.CommonUtils;
+import org.jsets.shiro.util.ShiroUtils;
+import com.google.common.base.Strings;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.lang.Collections;
+
 /**
  * 基于JWT（ JSON WEB TOKEN）的控制域
  * 
@@ -39,7 +49,16 @@ import io.jsonwebtoken.MalformedJwtException;
  */
 public class JwtRealm extends AuthorizingRealm{
 
-	private MessageConfig messages;
+	private final ShiroProperties properties;
+	private final CacheDelegator cacheDelegator;
+	private final ShiroStatelessAccountProvider accountProvider;
+
+	public JwtRealm(ShiroProperties properties
+			,CacheDelegator cacheDelegator,ShiroStatelessAccountProvider accountProvider) {
+		this.properties = properties;
+		this.cacheDelegator = cacheDelegator;
+		this.accountProvider = accountProvider;
+	}
 	
 	public Class<?> getAuthenticationTokenClass() {
 		return JwtToken.class;
@@ -50,23 +69,46 @@ public class JwtRealm extends AuthorizingRealm{
 	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-		// 只认证JwtToken
-		if(!(token instanceof JwtToken)) return null;
+
+		if(!(token instanceof JwtToken)) return null;// 只认证JwtToken
 		String jwt = ((JwtToken)token).getJwt();
+		if (this.properties.isHmacBurnEnabled() && this.cacheDelegator.burnedToken(jwt)) {
+			throw new AuthenticationException(ShiroProperties.MSG_BURNED_TOKEN);
+		}
 		String payload = null;
+		Map<String,Object> jwtMap = null;
 		try{
-			// 预先解析Payload
-			// 没有做任何的签名校验
-			 payload = Commons.parseJwtPayload(jwt);
+			 payload = CommonUtils.parseJwtPayload(jwt);
+			 jwtMap = CommonUtils.readJSON(payload,Map.class);
 		} catch(MalformedJwtException e){
-			throw new AuthenticationException(this.messages.getMsgJwtMalformed());
+			throw new AuthenticationException(this.properties.getMsgJwtMalformed());
 		} catch(Exception e){
-			throw new AuthenticationException(this.messages.getMsgJwtError());
+			throw new AuthenticationException(this.properties.getMsgJwtError());
 		}
-		if(null == payload){
-			throw new AuthenticationException(this.messages.getMsgJwtError());
+		if(Objects.isNull(payload))
+			throw new AuthenticationException(this.properties.getMsgJwtError());
+		String appId = (String)jwtMap.get("subject");
+		String secretKey = this.accountProvider.loadAppKey(appId);
+		if(Strings.isNullOrEmpty(secretKey)) secretKey = this.properties.getJwtSecretKey();
+		if(Strings.isNullOrEmpty(secretKey)) 
+			throw new AuthenticationException(ShiroProperties.MSG_NO_SECRET_KEY);
+		Boolean match = Boolean.TRUE;
+		StatelessAccount statelessAccount = null;
+		try{
+			statelessAccount = ShiroUtils.parseJwt(jwt, secretKey);
+		} catch(SignatureException e){
+			throw new AuthenticationException(this.properties.getMsgJwtSignature());
+		} catch(ExpiredJwtException e){
+			throw new AuthenticationException(this.properties.getMsgJwtTimeout());
+		} catch(Exception e){
+			throw new AuthenticationException(this.properties.getMsgJwtError());
 		}
-		return new SimpleAuthenticationInfo("jwt:"+payload,jwt,this.getName());
+		if(Objects.isNull(statelessAccount)) {
+			match = Boolean.FALSE;
+			throw new AuthenticationException(this.properties.getMsgJwtError());
+		}
+		
+		return new SimpleAuthenticationInfo("jwt:"+payload,match,this.getName());
 	}
 	
 	/** 
@@ -76,24 +118,14 @@ public class JwtRealm extends AuthorizingRealm{
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		
 		String payload = (String) principals.getPrimaryPrincipal();
-		// likely to be json, parse it:
-		if (payload.startsWith("jwt:") && payload.charAt(4) == '{' 
-									   && payload.charAt(payload.length() - 1) == '}') { 
-
-            Map<String, Object> payloadMap = Commons.readValue(payload.substring(4));
-    		Set<String> roles = Commons.split((String)payloadMap.get("roles"));
-    		Set<String> permissions = Commons.split((String)payloadMap.get("perms"));
-    		SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
-    		if(null!=roles&&!roles.isEmpty())
-    			info.setRoles(roles);
-    		if(null!=permissions&&!permissions.isEmpty())
-    			info.setStringPermissions(permissions);
-    		 return info;
-        }
-        return null;
-	}
-
-	public void setMessages(MessageConfig messages) {
-		this.messages = messages;
+		String jwtPayload = CommonUtils.jwtPayload(payload);
+		if(Objects.isNull(jwtPayload)) return null;
+        Map<String, Object> payloadMap = CommonUtils.readJSON(jwtPayload,Map.class);
+    	Set<String> roles = CommonUtils.split((String)payloadMap.get("roles"));
+    	Set<String> permissions = CommonUtils.split((String)payloadMap.get("perms"));
+    	SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
+		if(!Collections.isEmpty(roles)) info.setRoles(roles);
+		if(!Collections.isEmpty(permissions)) info.setStringPermissions(permissions);
+		return info;
 	}
 }

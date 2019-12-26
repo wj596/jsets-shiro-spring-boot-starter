@@ -23,8 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.CollectionUtils;
-
-import com.google.common.collect.Lists;
+import org.jsets.shiro.listener.AuthListenerManager;
 
 /**
  * 重写RolesAuthorizationFilter，使其继承自JsetsAuthorizationFilter;
@@ -34,6 +33,12 @@ import com.google.common.collect.Lists;
  * @date 2016年6月31日
  */
 public class JsetsRolesAuthorizationFilter extends JsetsAuthorizationFilter{
+	
+	private final AuthListenerManager authListenerManager;
+	
+	public JsetsRolesAuthorizationFilter(AuthListenerManager authListenerManager) {
+		this.authListenerManager = authListenerManager;
+	}
 
     public boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws IOException {
     	Subject subject = getSubject(request, response);
@@ -44,8 +49,12 @@ public class JsetsRolesAuthorizationFilter extends JsetsAuthorizationFilter{
         List<String> roles = CollectionUtils.asList(rolesArray);
         boolean[] hasRoles = subject.hasRoles(roles);
         for(boolean hasRole:hasRoles){
-        	if(hasRole) return true;
+        	if(hasRole) {
+        		this.authListenerManager.onAccessAssert(request, (String)subject.getPrincipal(),roles.toString(), true);
+        		return true;
+        	}
         }
+        this.authListenerManager.onAccessAssert(request, (String)subject.getPrincipal(),roles.toString(), false);
         return false;
     }
 }

@@ -27,11 +27,10 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
-import org.jsets.shiro.config.MessageConfig;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.token.HmacToken;
 import org.jsets.shiro.token.JwtToken;
-import org.jsets.shiro.util.Commons;
+import org.jsets.shiro.util.CommonUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
@@ -122,14 +121,14 @@ public abstract class StatelessFilter extends AccessControlFilter{
         Subject subject = getSubject(request, response);
         //未认证
         if (null == subject || !subject.isAuthenticated()) {
-        	Commons.restFailed(WebUtils.toHttp(response)
-        								,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED
-        								,MessageConfig.REST_MESSAGE_AUTH_UNAUTHORIZED);
+        	CommonUtils.restFailed(WebUtils.toHttp(response)
+        								,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
+        								,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
         //未授权
         } else {
-    		Commons.restFailed(WebUtils.toHttp(response)
-										,MessageConfig.REST_CODE_AUTH_FORBIDDEN
-										,MessageConfig.REST_MESSAGE_AUTH_FORBIDDEN);
+    		CommonUtils.restFailed(WebUtils.toHttp(response)
+										,ShiroProperties.REST_CODE_AUTH_FORBIDDEN
+										,ShiroProperties.REST_MESSAGE_AUTH_FORBIDDEN);
         }	
         return false;
 	}

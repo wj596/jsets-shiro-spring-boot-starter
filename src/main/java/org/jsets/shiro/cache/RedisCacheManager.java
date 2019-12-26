@@ -55,10 +55,14 @@ public class RedisCacheManager implements CacheManager{
 		this.redisTemplate.expire(cacheName, timeout, TimeUnit.SECONDS);
 	}
 
-	public void setRedisTemplate(RedisTemplate<Object, Object> redisTemplate) {
+	public void setRedisTemplate(RedisTemplate redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}
 	
+	public RedisTemplate getRedisTemplate() {
+		return redisTemplate;
+	}
+
 	/**
 	 * 基于REDIS的缓存
 	 *

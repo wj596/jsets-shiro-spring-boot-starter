@@ -15,26 +15,24 @@
  * limitations under the License.
  * </p>
  */
-package org.jsets.shiro.config;
+package org.jsets.shiro.listener;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import org.springframework.context.annotation.Import;
+import org.apache.shiro.authc.AuthenticationException;
 
 /**
- * jsets-shiro自动配置注解
+ * 密码连续错误次数超限处理器接口
  * 
  * @author wangjie (https://github.com/wj596)
  * @date 2016年6月31日
- *
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Import(ShiroAutoConfiguration.class)
-public @interface EnableJsetsShiro {
+public interface PasswdRetryLimitListener {
 
+	/**
+	 * 处理
+	 * @param account 账号
+	 * @param maxRetries 最大重试次数
+	 * @param retries 重试次数
+	 */
+	public void handle(String account,int maxRetries,int retries) throws AuthenticationException;
+	
 }

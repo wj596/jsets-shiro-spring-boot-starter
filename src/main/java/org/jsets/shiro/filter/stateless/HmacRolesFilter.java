@@ -23,8 +23,8 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.WebUtils;
-import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.util.Commons;
+import org.jsets.shiro.config.ShiroProperties;
+import org.jsets.shiro.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -49,8 +49,8 @@ public class HmacRolesFilter extends StatelessFilter{
 				return this.checkRoles(subject,mappedValue);
 			} catch (AuthenticationException e) {
 				LOGGER.error(request.getRemoteHost()+" HMAC鉴权  "+e.getMessage());
-				Commons.restFailed(WebUtils.toHttp(response)
-										,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
+				CommonUtils.restFailed(WebUtils.toHttp(response)
+										,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
 			}	
 		}
 		return false;

@@ -22,6 +22,7 @@ import javax.servlet.ServletResponse;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.jsets.shiro.config.ShiroProperties;
+import org.jsets.shiro.listener.AuthListenerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,13 @@ public class ForceLogoutFilter extends JsetsAccessControlFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ForceLogoutFilter.class);
 
-	private ShiroProperties properties;
+	private final ShiroProperties properties;
+	private final AuthListenerManager authListenerManager;
+	
+	public ForceLogoutFilter(ShiroProperties properties,AuthListenerManager authListenerManager) {
+		this.properties = properties;
+		this.authListenerManager = authListenerManager;
+	}
 	
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
@@ -50,13 +57,11 @@ public class ForceLogoutFilter extends JsetsAccessControlFilter {
 		}
 		Session currentSession = subject.getSession();
         if (null!=currentSession.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_FORCE_LOGOUT)) {
-        	subject.logout();
+        	String account = (String) subject.getPrincipal();
+            subject.logout();
+            this.authListenerManager.onForceLogout(request, account);
 			return this.respondRedirect(request, response,this.properties.getForceLogoutUrl());
         }
         return true;
-	}
-
-	public void setProperties(ShiroProperties properties) {
-		this.properties = properties;
 	}
 }

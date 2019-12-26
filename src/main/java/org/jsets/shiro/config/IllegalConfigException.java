@@ -44,5 +44,4 @@ public class IllegalConfigException extends RuntimeException{
         super(cause);
     }
 
-
 }

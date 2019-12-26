@@ -23,10 +23,9 @@ import javax.servlet.ServletResponse;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
+import org.jsets.shiro.api.ShiroAccountProvider;
 import org.jsets.shiro.config.ShiroProperties;
 import org.jsets.shiro.model.Account;
-import org.jsets.shiro.service.ShiroAccountProvider;
-
 
 /**
  * 认证过滤，器扩展自UserFilter：增加了针对ajax请求的处理
@@ -36,7 +35,11 @@ import org.jsets.shiro.service.ShiroAccountProvider;
  */
 public class JsetsUserFilter extends JsetsAccessControlFilter {
 
-	private ShiroAccountProvider accountService;
+	private final ShiroAccountProvider accountProvider;
+
+	public JsetsUserFilter(ShiroAccountProvider accountProvider) {
+		this.accountProvider = accountProvider;
+	}
 
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws IOException{
 		
@@ -49,7 +52,7 @@ public class JsetsUserFilter extends JsetsAccessControlFilter {
 				if (null==session.getAttribute(ShiroProperties.ATTRIBUTE_SESSION_CURRENT_USER)) {
 					String userId = (String) subject.getPrincipal();
 					try{
-						Account account = this.accountService.loadAccount(userId);
+						Account account = this.accountProvider.loadAccount(userId);
 						session.setAttribute(ShiroProperties.ATTRIBUTE_SESSION_CURRENT_USER, account);
 					}catch(AuthenticationException e){
 						//log
@@ -64,10 +67,7 @@ public class JsetsUserFilter extends JsetsAccessControlFilter {
 	}
 
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
+		
 		return this.respondLogin(request, response);
-	}
-
-	public void setAccountService(ShiroAccountProvider accountService) {
-		this.accountService = accountService;
 	}
 }

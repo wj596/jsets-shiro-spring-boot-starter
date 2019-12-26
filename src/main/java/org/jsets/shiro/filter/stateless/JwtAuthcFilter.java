@@ -24,8 +24,8 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
-import org.jsets.shiro.config.MessageConfig;
-import org.jsets.shiro.util.Commons;
+import org.jsets.shiro.config.ShiroProperties;
+import org.jsets.shiro.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -57,13 +57,13 @@ public class JwtAuthcFilter extends StatelessFilter{
 				return true;
 			} catch (AuthenticationException e) {
 				LOGGER.error(request.getRemoteHost()+" JWT认证  "+e.getMessage());
-				Commons.restFailed(WebUtils.toHttp(response)
-						,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
+				CommonUtils.restFailed(WebUtils.toHttp(response)
+						,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED,e.getMessage());
 			} 
 		}
-		Commons.restFailed(WebUtils.toHttp(response)
-										,MessageConfig.REST_CODE_AUTH_UNAUTHORIZED
-										,MessageConfig.REST_MESSAGE_AUTH_UNAUTHORIZED);
+		CommonUtils.restFailed(WebUtils.toHttp(response)
+										,ShiroProperties.REST_CODE_AUTH_UNAUTHORIZED
+										,ShiroProperties.REST_MESSAGE_AUTH_UNAUTHORIZED);
 		return false;
 	}
 }

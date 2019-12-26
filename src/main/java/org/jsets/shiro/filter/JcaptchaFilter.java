@@ -28,32 +28,40 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.web.servlet.OncePerRequestFilter;
 import org.apache.shiro.web.util.WebUtils;
-import org.jsets.shiro.util.JCaptchaUtil;
+import org.jsets.shiro.api.CaptchaProvider;
+
+
 /**
  * 验证码生成过滤器
  * 
  * author wangjie (https://github.com/wj596)
+ * 
  * @date 2016年6月31日
  *
  */
-public class JcaptchaFilter extends OncePerRequestFilter {  
+public class JcaptchaFilter extends OncePerRequestFilter {
+
+	private final CaptchaProvider captchaProvider;
+
+	public JcaptchaFilter(CaptchaProvider captchaProvider) {
+		this.captchaProvider = captchaProvider;
+	}
 
 	@Override
 	public void doFilterInternal(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletResponse httpResponse = WebUtils.toHttp(response);
-		httpResponse.setHeader("Cache-Control", "no-store"); 
-		httpResponse.setHeader("Pragma", "no-cache"); 
-		httpResponse.setDateHeader("Expires", 0); 
-		httpResponse.setContentType("image/jpeg"); 
-        ServletOutputStream output = httpResponse.getOutputStream();
-        try {  
-            BufferedImage image = JCaptchaUtil.generateCaptcha(WebUtils.toHttp(request));
-            ImageIO.write(image, "jpg", output);
-            output.flush();  
-        } finally {  
-        	output.close();  
-        }
-		
+		httpResponse.setHeader("Cache-Control", "no-store");
+		httpResponse.setHeader("Pragma", "no-cache");
+		httpResponse.setDateHeader("Expires", 0);
+		httpResponse.setContentType("image/jpeg");
+		ServletOutputStream output = httpResponse.getOutputStream();
+		try {
+			BufferedImage image = this.captchaProvider.generateCaptcha(WebUtils.toHttp(request));
+			ImageIO.write(image, "jpg", output);
+			output.flush();
+		} finally {
+			output.close();
+		}
 	}
 }

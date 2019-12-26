@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jsets</groupId>
 	<artifactId>jsets-shiro-spring-boot-starter</artifactId>
-	<version>1.0.2</version>
+	<version>1.1.0</version>
 
 	<properties>
-		<spring-boot.version>1.5.3.RELEASE</spring-boot.version>
-		<spring-data-redis.version>1.8.3.RELEASE</spring-data-redis.version>
+		<spring-boot.version>2.1.1.RELEASE</spring-boot.version>
+		<spring-data-redis.version>2.1.4.RELEASE</spring-data-redis.version>
 		<shiro.version>1.4.0</shiro.version>
 		<jjwt.version>0.9.0</jjwt.version>
 		<jcaptcha.version>1.0-all</jcaptcha.version>
