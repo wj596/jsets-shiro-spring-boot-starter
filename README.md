@@ -10,6 +10,8 @@ springboot中使用shiro大都是通过shiro-spring.jar进行的整合的,虽然
 
 jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动导入，少量的配置就可以应用在项目中。
 
+你也可以用这个项目来深入的研究shiro。
+
 #### 实现的功能
 
 1、spring-boot-starter风格的开箱即用。
