@@ -38,7 +38,7 @@ jsets-shiro-spring-boot-starter对这些常用的功能进行了封装和自动�
 
 2、spring-data-redis升级到2.1.4.RELEASE
 
-3、支持自定义jcaptcha验证码验证码
+3、支持自定义jcaptcha验证码
 
 3、新增鉴权监听器
 
